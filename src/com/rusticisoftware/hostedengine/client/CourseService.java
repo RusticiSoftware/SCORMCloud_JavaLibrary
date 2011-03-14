@@ -774,4 +774,16 @@ public class CourseService
         	request.getParameters().add("cssurl", cssUrl);
         return request.constructUrl("rustici.course.preview");
     }
+
+	/// <summary>
+    /// Check for the existence of a course on the SCORM cloud
+    /// </summary>
+    /// <param name="courseId">Unique Course Identifier</param>
+    public Boolean Exists(String courseId) throws Exception
+    {
+        ServiceRequest request = new ServiceRequest(configuration);
+        request.getParameters().add("courseid", courseId);
+        Document response = request.callService("rustici.course.exists");
+		return Boolean.parseBoolean(((Element)response.getElementsByTagName("result").item(0)).getTextContent());
+    }
 }

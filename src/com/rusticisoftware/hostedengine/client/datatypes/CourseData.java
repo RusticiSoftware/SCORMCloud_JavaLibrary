@@ -1,4 +1,4 @@
-package com.rusticisoftware.hostedengine.client;
+package com.rusticisoftware.hostedengine.client.datatypes;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,6 +6,10 @@ import java.util.List;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
+
+import com.rusticisoftware.hostedengine.client.Utils;
+import com.rusticisoftware.hostedengine.client.XmlUtils;
+
 
 public class CourseData {
 
@@ -15,6 +19,7 @@ public class CourseData {
 	private int numberOfRegistrations;
 	private String title;
 	private long size;
+	private List<String> tags;
 
 
 	public CourseData() {
@@ -67,6 +72,14 @@ public class CourseData {
 	public void setSize(long size) {
 	    this.size = size;
 	}
+	
+	public List<String> getTags(){
+		return tags;
+	}
+	
+	public void setTags(List<String> tags){
+		this.tags = tags;
+	}
 
 	public static CourseData parseFromXmlElement (Element courseElem) throws Exception {
 		String id = courseElem.getAttribute("id");
@@ -95,10 +108,20 @@ public class CourseData {
 		data.setNumberOfRegistrations(numRegistrations);
 		data.setSize(size);
 		
+		List<String> tags = new ArrayList<String>();
+		Element tagsElem = XmlUtils.getFirstChildByTagName(courseElem, "tags");
+		if(tagsElem != null){
+			List<Element> tagElems = XmlUtils.getChildrenByTagName(tagsElem, "tag");
+			for(Element tagElem : tagElems){
+				tags.add(tagElem.getTextContent());
+			}
+		}
+		data.setTags(tags);
+		
 		return data;
 	}
 	
-	public static List<CourseData> ConvertToCourseDataList (Document courseListXmlDoc) throws Exception {
+	public static List<CourseData> parseListFromXml (Document courseListXmlDoc) throws Exception {
 		Element courseListElem = (Element)courseListXmlDoc.getElementsByTagName("courselist").item(0);
 		
 		ArrayList<CourseData> courseList = new ArrayList<CourseData>();
@@ -110,18 +133,26 @@ public class CourseData {
 		return courseList;
 	}
 	
-//	public static String getXmlString (List<CourseData> courseList){
-//		StringBuilder xml = new StringBuilder();
-//		xml.append("<courselist>");
-//		for(CourseData data : courseList){
-//			xml.append("<course id=\"" + Utils.xmlEncode(data.getCourseId()) + "\" ");
-//			xml.append("title=\"" + Utils.xmlEncode(data.getTitle()) + "\" ");
-//			xml.append("versions=\"" + data.getNumberOfVersions() + "\" ");
-//			xml.append("registrations=\"" + data.getNumberOfRegistrations() + "\" ");
-//			xml.append("size=\"" + data.getSize() + "\" ");
-//			xml.append("/>");
-//		}
-//		xml.append("</courselist>");
-//		return xml.toString();
-//	}
+	public static String getXmlString (List<CourseData> courseList){
+		StringBuilder xml = new StringBuilder();
+		xml.append("<courselist>");
+		for(CourseData data : courseList){
+			xml.append("<course id=\"" + Utils.xmlEncode(data.getCourseId()) + "\" ");
+			xml.append("title=\"" + Utils.xmlEncode(data.getTitle()) + "\" ");
+			xml.append("versions=\"" + data.getNumberOfVersions() + "\" ");
+			xml.append("registrations=\"" + data.getNumberOfRegistrations() + "\" ");
+			xml.append("size=\"" + data.getSize() + "\" ");
+			xml.append(">");
+			xml.append("<tags>");
+			if(data.getTags() != null && data.getTags().size() > 0){
+				for(String tag : data.getTags()){
+					xml.append("<tag><![CDATA[" + tag + "]]></tag>");
+				}
+			}
+			xml.append("</tags>");
+			xml.append("</course>");
+		}
+		xml.append("</courselist>");
+		return xml.toString();
+	}
 }

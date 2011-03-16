@@ -7,6 +7,10 @@ import java.util.logging.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import com.rusticisoftware.hostedengine.client.datatypes.FileData;
+import com.rusticisoftware.hostedengine.client.datatypes.UploadProgress;
+import com.rusticisoftware.hostedengine.client.datatypes.UploadToken;
+
 public class UploadService
 {
 	private static final Logger log = Logger.getLogger(UploadService.class.toString());

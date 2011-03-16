@@ -1,4 +1,4 @@
-package com.rusticisoftware.hostedengine.client;
+package com.rusticisoftware.hostedengine.client.datatypes;
 
 import org.w3c.dom.Element;
 

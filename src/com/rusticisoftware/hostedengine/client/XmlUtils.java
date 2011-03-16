@@ -10,6 +10,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -58,6 +59,17 @@ public class XmlUtils
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         DocumentBuilder docBuilder = dbf.newDocumentBuilder();
         return docBuilder.parse(new ByteArrayInputStream(xmlString.getBytes("UTF-8")));
+    }
+    
+    private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'.'SSSZ");
+    static { sdf.setTimeZone(TimeZone.getTimeZone("UTC")); }
+    public static Date parseXmlDate(String xmlDate) throws Exception {
+    	if(xmlDate == null){
+    		return null;
+    	}
+    	synchronized(sdf){
+    		return sdf.parse(xmlDate);
+    	}
     }
     
     public static String xmlEncode (String str)

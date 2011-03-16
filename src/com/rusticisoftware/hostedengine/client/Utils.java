@@ -10,7 +10,9 @@ import java.net.URLEncoder;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.TimeZone;
+import java.util.regex.Pattern;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -76,5 +78,37 @@ public class Utils {
     
     public static String getNonXmlPayloadFromResponse(Document response){
         return response.getElementsByTagName("rsp").item(0).getTextContent();
+    }
+    
+    public static String cleanRegistrationId(String input)
+    {
+		return input.replaceAll("[^-\\w\\s.]+", "");
+    }
+    
+    public static String join(String[] strings, String separator) {
+    	if(strings == null){
+			return null;
+		}
+    	
+    	StringBuilder result = new StringBuilder();
+    	boolean first = true;
+		for (String str : strings){
+			result.append(first ? "" : separator);
+			result.append(str);
+			first = false;
+		}
+		return result.toString();
+	}
+    public static String join(List<String> strings, String separator){
+    	return join(strings.toArray(new String[strings.size()]), separator);
+    }
+    
+    public static String xmlEncode (String str)
+    {
+        return str.replace("&", "&amp;")
+                  .replace("<", "&lt;")
+                  .replace("<", "&gt;")
+                  .replace("\"", "&quot;")
+                  .replace("'", "&apos;");
     }
 }

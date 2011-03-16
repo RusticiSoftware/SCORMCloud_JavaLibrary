@@ -9,6 +9,8 @@ public class ScormEngineService
     private FtpService ftpService = null;
     private ExportService exportService = null;
     private ReportingService reportingService = null;
+    private TaggingService taggingService = null;
+    private DispatchService dispatchService = null;
     private DebugService debugService = null;
 
     /// <summary>
@@ -35,6 +37,8 @@ public class ScormEngineService
         ftpService = new FtpService(configuration, this);
         exportService = new ExportService(configuration, this);
         reportingService = new ReportingService(configuration, this);
+        taggingService = new TaggingService(configuration, this);
+        dispatchService = new DispatchService(configuration, this);
         debugService = new DebugService(configuration, this);
     }
 
@@ -86,7 +90,29 @@ public class ScormEngineService
     {
         return reportingService;
     }
-
+    
+    /// <summary>
+    /// Contains SCORM Cloud tagging methods.
+    /// </summary>
+    public TaggingService getTaggingService()
+    {
+        return taggingService;
+    }
+    
+    /// <summary>
+    /// Contains methods for accessing SCORM dispatch
+    /// </summary>
+    public DispatchService getDispatchService() {
+		return dispatchService;
+	}
+    
+    /// <summary>
+    /// Contains SCORM Cloud debug methods.
+    /// </summary>
+    public DebugService getDebugService(){
+    	return debugService;
+    }
+    
     /// <summary>
     /// The Application ID obtained by registering with the SCORM Engine Service
     /// </summary>
@@ -135,8 +161,4 @@ public class ScormEngineService
     }
 
 	
-
-	public DebugService getDebugService() {
-		return debugService;
-	}
 }

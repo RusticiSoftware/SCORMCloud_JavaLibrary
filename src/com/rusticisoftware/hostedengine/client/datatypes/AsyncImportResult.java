@@ -1,9 +1,10 @@
-package com.rusticisoftware.hostedengine.client;
+package com.rusticisoftware.hostedengine.client.datatypes;
 
 import java.util.List;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
 
 public class AsyncImportResult
 {

@@ -1,4 +1,4 @@
-package com.rusticisoftware.hostedengine.client;
+package com.rusticisoftware.hostedengine.client.datatypes;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,6 +6,8 @@ import java.util.List;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
+
+import com.rusticisoftware.hostedengine.client.XmlUtils;
 
 public class RegistrationData {
 

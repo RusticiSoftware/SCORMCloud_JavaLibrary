@@ -1,4 +1,4 @@
-package com.rusticisoftware.hostedengine.client;
+package com.rusticisoftware.hostedengine.client.datatypes;
 
 import java.util.ArrayList;
 
@@ -8,6 +8,7 @@ import org.w3c.dom.NodeList;
 public class CourseMetadata {
 
 	private String id;
+	private String objectTitle;
 	private String title;
 	private String description;
 	private Long duration;
@@ -23,6 +24,12 @@ public class CourseMetadata {
 	}
 	public void setId(String id) {
 		this.id = id;
+	}
+	public String getObjectTitle(){
+		return objectTitle;
+	}
+	public void setObjectTitle(String objectTitle){
+		this.objectTitle = objectTitle;
 	}
 	public String getTitle() {
 		return title;
@@ -67,9 +74,12 @@ public class CourseMetadata {
 		this.children = children;
 	}
 	
-	public static CourseMetadata parseFromXmlElement (Element elem) throws Exception {
+	public static CourseMetadata parseFromXmlElement (Element objectElem) throws Exception {
 		CourseMetadata data = new CourseMetadata();
-		data.setId(elem.getAttribute("id"));
+		data.setId(objectElem.getAttribute("id"));
+		data.setObjectTitle(objectElem.getAttribute("title")); 
+		
+		Element elem = (Element)objectElem.getElementsByTagName("metadata").item(0);
 		NodeList attrs = elem.getChildNodes();
 		for(int i = 0; i < attrs.getLength(); i++){
 			Element attr = (Element)attrs.item(i);

@@ -73,15 +73,31 @@ public class ScormCloud
     {
         return getService().getReportingService();
     }
-
+    
     /// <summary>
-    /// Contains SCORM Cloud debug methods.
+    /// Contains SCORM Cloud tagging methods.
     /// </summary>
-    public static DebugService getDebugService() throws Exception
+    public static TaggingService getTaggingService() throws Exception
     {
-        return getService().getDebugService();
+        return getService().getTaggingService();
     }
     
+    /// <summary>
+    /// Contains SCORM Cloud dispatch methods
+    /// </summary>
+    public static DispatchService getDispatchService() throws Exception
+    {
+    	return getService().getDispatchService();
+    }
+    
+    /// <summary>
+    /// Contains SCORM Cloud debug methods
+    /// </summary>
+    public static DebugService getDebugService() throws Exception 
+    {
+    	return getService().getDebugService();
+    }
+
     /// <summary>
     /// The Application ID obtained by registering with the SCORM Engine Service
     /// </summary>

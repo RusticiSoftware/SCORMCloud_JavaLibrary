@@ -2,9 +2,12 @@ package com.rusticisoftware.hostedengine.client;
 
 import java.io.File;
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import com.rusticisoftware.hostedengine.client.datatypes.Export;
 
 public class ExportService
 {

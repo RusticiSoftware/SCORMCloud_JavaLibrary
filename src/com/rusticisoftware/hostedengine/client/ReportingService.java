@@ -1,10 +1,14 @@
 package com.rusticisoftware.hostedengine.client;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import com.rusticisoftware.hostedengine.client.datatypes.Enums;
 
 public class ReportingService
 {
@@ -25,6 +29,12 @@ public class ReportingService
     	return response.getElementsByTagName("auth").item(0).getTextContent();
     }
     
+    public void UpdateApplicationInReportage() throws Exception
+    {
+    	ServiceRequest sr = new ServiceRequest(this.configuration);
+    	sr.callService("rustici.reporting.updateApplicationInReportage");
+    }
+    
     /// <summary>
     /// Calling this method returns a URL which will authenticate and launch a Reportage session, starting
     /// at the specified Reportage URL entry point.
@@ -43,12 +53,15 @@ public class ReportingService
     	return sr.constructUrl("rustici.reporting.launchReport");
     }
     
-    public String GetReportDate() throws Exception
+    public Date GetReportDate() throws Exception
     {
         ServiceRequest sr = new ServiceRequest(this.configuration);
         String url = "http://" + sr.getServer() + 
             "/Reportage/scormreports/api/getReportDate.php?appId=" + this.configuration.getAppId();
-        return new String(sr.getResponseFromUrl(url), "UTF-8");
+        String dateStr = new String(sr.getResponseFromUrl(url), "UTF-8");
+        SimpleDateFormat reportageParseDateFormat = new SimpleDateFormat("yyyy-M-d k:mm:ss");
+        try { return reportageParseDateFormat.parse(dateStr); }
+        catch (Exception e) { return new Date(); }
     }
 
 

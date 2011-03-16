@@ -1,4 +1,4 @@
-package com.rusticisoftware.hostedengine.client;
+package com.rusticisoftware.hostedengine.client.datatypes;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -6,6 +6,9 @@ import java.util.List;
 import java.util.UUID;
 
 import org.w3c.dom.Element;
+
+import com.rusticisoftware.hostedengine.client.Utils;
+import com.rusticisoftware.hostedengine.client.XmlUtils;
 
 public class Export
 {

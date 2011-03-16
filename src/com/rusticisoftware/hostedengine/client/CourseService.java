@@ -8,7 +8,11 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
-import com.rusticisoftware.hostedengine.client.Enums.*;
+import com.rusticisoftware.hostedengine.client.datatypes.AsyncImportStatus;
+import com.rusticisoftware.hostedengine.client.datatypes.CourseData;
+import com.rusticisoftware.hostedengine.client.datatypes.CourseMetadata;
+import com.rusticisoftware.hostedengine.client.datatypes.ImportResult;
+import com.rusticisoftware.hostedengine.client.datatypes.Enums.*;
 
 public class CourseService
 {
@@ -23,6 +27,18 @@ public class CourseService
     {
         this.configuration = configuration;
         this.manager = manager;
+    }
+    
+    /// <summary>
+    /// Check for the existence of a course on SCORM Cloud
+    /// </summary>
+    public boolean Exists(String courseId) throws Exception
+    {
+    	ServiceRequest sr = new ServiceRequest(this.configuration);
+    	sr.getParameters().add("courseid", courseId);
+    	Document response = sr.callService("rustici.course.exists");
+    	Element resultElem = (Element)(response.getElementsByTagName("result").item(0));
+    	return Boolean.parseBoolean(resultElem.getTextContent());
     }
 
     /// <summary>
@@ -61,15 +77,7 @@ public class CourseService
     public List<ImportResult> ImportCourse(String courseId, String absoluteFilePathToZip, 
         String itemIdToImport, String permissionDomain, String userEmail) throws Exception
     {
-        String location = manager.getUploadService().UploadFile(absoluteFilePathToZip, permissionDomain);
-        List<ImportResult> results = null;
-        try {
-            results = ImportUploadedCourse(courseId, location, itemIdToImport, permissionDomain, userEmail);
-        }
-        finally {
-            manager.getUploadService().DeleteFile(location);
-        }
-        return results;
+    	return this.ImportCourse(courseId, absoluteFilePathToZip, itemIdToImport, permissionDomain, userEmail, true);
     }
     
 
@@ -117,6 +125,87 @@ public class CourseService
     {
             return ImportUploadedCourse(courseId, path, itemIdToImport, permissionDomain, userEmail, true);
     }
+    
+    
+  /// <summary>
+    /// Import a SCORM .pif (zip file) from an existing .zip file on the
+    /// Hosted SCORM Engine server.
+    /// </summary>
+    public List<ImportResult> ImportCourse(String courseId, String absoluteFilePathToZip, String itemIdToImport, String permissionDomain, String userEmail, boolean useAsync) throws Exception
+    {
+        if (useAsync) {
+            String importToken = this.ImportCourseAsync(courseId, absoluteFilePathToZip, itemIdToImport, permissionDomain, userEmail, true);
+            return GetAsyncImportResults(importToken);
+        }
+        else {
+            ServiceRequest request = new ServiceRequest(configuration);
+            request.getParameters().add("courseid", courseId);
+            if (!(itemIdToImport == null || itemIdToImport == ""))
+                request.getParameters().add("itemid", itemIdToImport);
+            if (!Utils.isNullOrEmpty(permissionDomain))
+                request.getParameters().add("pd", permissionDomain);
+            if(!Utils.isNullOrEmpty(userEmail))
+            	request.getParameters().add("email", userEmail);
+            request.setFileToPost(absoluteFilePathToZip);
+            
+            Document response = request.callService("rustici.course.importCourse");
+            return ImportResult.ConvertToImportResults(response);
+        }
+    }
+    
+    public List<ImportResult> GetAsyncUpdateResults(String updateToken) throws Exception {
+    	return GetAsyncImportResults(updateToken);
+    }
+    public List<ImportResult> GetAsyncImportResults(String importToken) throws Exception {
+    	AsyncImportStatus result = null;
+        
+        int sleepTime = 2000;
+        int maxTries = 60;
+        int tryNumber = 0;
+        while (tryNumber < maxTries) {
+            result = this.GetAsyncImportStatus(importToken);
+            if (result.IsComplete()) 
+                break;
+            //No result yet, sleep, and retry
+            Thread.sleep(sleepTime);
+            if(sleepTime < 30000){
+            	sleepTime = (int)(sleepTime * 1.6);
+            }
+            tryNumber = tryNumber + 1;
+        }
+        
+        if(result == null){
+        	throw new ServiceException("Async import never returned anything!");
+        }
+        if (result.HasError()) {
+            throw new ServiceException(result.getErrorCode(), result.getErrorMessage());
+        }
+        else {
+            return result.getImportResults();
+        }
+    }
+    
+    public String ImportCourseAsync(String courseId, String absoluteFilePath, String itemIdToImport, String permissionDomain, String userEmail, boolean finalizeSynchronously) throws Exception
+    {
+        ServiceRequest request = new ServiceRequest(configuration);
+        request.getParameters().add("courseid", courseId);
+        if (!Utils.isNullOrEmpty(itemIdToImport))
+            request.getParameters().add("itemid", itemIdToImport);
+        if (!Utils.isNullOrEmpty(permissionDomain))
+            request.getParameters().add("pd", permissionDomain);
+        if(!Utils.isNullOrEmpty(userEmail))
+        	request.getParameters().add("email", userEmail);
+        if(finalizeSynchronously)
+        	request.getParameters().add("finalize", true);
+        request.setFileToPost(absoluteFilePath);
+        
+        
+        Document response = request.callService("rustici.course.importCourseAsync");
+        String tokenId = ((Element)response
+                                .getElementsByTagName("token").item(0))
+                                .getFirstChild().getTextContent();
+        return tokenId;
+    }
 
     /// <summary>
     /// Import a SCORM .pif (zip file) from an existing .zip file on the
@@ -134,14 +223,14 @@ public class CourseService
     public List<ImportResult> ImportUploadedCourse(String courseId, String path, String itemIdToImport, String permissionDomain, String userEmail, boolean useAsync) throws Exception
     {
         if (useAsync) {
-            String importToken = this.ImportUploadedCourseAsync(courseId, path, itemIdToImport, permissionDomain, userEmail);
-            AsyncImportResult result = null;
+            String importToken = this.ImportUploadedCourseAsync(courseId, path, itemIdToImport, permissionDomain, userEmail, false);
+            AsyncImportStatus result = null;
             
             int sleepTime = 2000;
             int maxTries = 60;
             int tryNumber = 0;
             while (tryNumber < maxTries) {
-                result = this.GetAsyncImportResult(importToken);
+                result = this.GetAsyncImportStatus(importToken);
                 if (result.IsComplete()) 
                     break;
                 //No result yet, sleep, and retry
@@ -177,7 +266,9 @@ public class CourseService
         }
     }
 
-    public String ImportUploadedCourseAsync(String courseId, String path, String itemIdToImport, String permissionDomain, String userEmail) throws Exception
+    
+    
+    public String ImportUploadedCourseAsync(String courseId, String path, String itemIdToImport, String permissionDomain, String userEmail, boolean finalizeSynchronously) throws Exception
     {
         ServiceRequest request = new ServiceRequest(configuration);
         request.getParameters().add("courseid", courseId);
@@ -188,6 +279,8 @@ public class CourseService
             request.getParameters().add("pd", permissionDomain);
         if(!Utils.isNullOrEmpty(userEmail))
         	request.getParameters().add("email", userEmail);
+        if(finalizeSynchronously)
+        	request.getParameters().add("finalize", true);
         Document response = request.callService("rustici.course.importCourseAsync");
         String tokenId = ((Element)response
                                 .getElementsByTagName("token").item(0))
@@ -195,12 +288,15 @@ public class CourseService
         return tokenId;
     }
 
-    public AsyncImportResult GetAsyncImportResult(String tokenId) throws Exception
+    public AsyncImportStatus GetAsyncUpdateStatus(String tokenId) throws Exception {
+    	return GetAsyncImportStatus(tokenId);
+    }
+    public AsyncImportStatus GetAsyncImportStatus(String tokenId) throws Exception
     {
         ServiceRequest request = new ServiceRequest(configuration);
         request.getParameters().add("token", tokenId);
         Document response = request.callService("rustici.course.getAsyncImportResult");
-        return new AsyncImportResult(response);
+        return new AsyncImportStatus(response);
     }
 
 
@@ -285,15 +381,21 @@ public class CourseService
     /// </summary>
     /// <param name="courseIdFilterRegex">Regular expresion to filter the courses by ID</param>
     /// <returns>List of Course Data objects</returns>
-    public List<CourseData> GetCourseList(String courseIdFilterRegex) throws Exception
+    public List<CourseData> GetCourseList(String courseIdFilterRegex, List<String> tagList) throws Exception
     {
         ServiceRequest request = new ServiceRequest(configuration);
-        if (!Utils.isNullOrEmpty(courseIdFilterRegex))
+        if (!Utils.isNullOrEmpty(courseIdFilterRegex)){
             request.getParameters().add("filter", courseIdFilterRegex);
+        }
+        if(tagList != null && tagList.size() > 0){
+        	request.getParameters().add("tags", Utils.join(tagList, ","));
+        }
         Document response = request.callService("rustici.course.getCourseList");
-        return CourseData.ConvertToCourseDataList(response);
+        return CourseData.parseListFromXml(response);
     }
 
+    
+    
     /// <summary>
     /// Retrieve a list of high-level data about all courses owned by the 
     /// configured appId.
@@ -301,9 +403,7 @@ public class CourseService
     /// <returns>List of Course Data objects</returns>
     public List<CourseData> GetCourseList() throws Exception
     {
-        ServiceRequest request = new ServiceRequest(configuration);
-        Document response = request.callService("rustici.course.getCourseList");
-        return CourseData.ConvertToCourseDataList(response);
+    	return GetCourseList(null, null);
     }
 
     /// <summary>
@@ -404,7 +504,7 @@ public class CourseService
     /// <param name="scope">Defines the scope of the data to return: Course or Activity level</param>
     /// <param name="format">Defines the amount of data to return:  Summary or Detailed</param>
     /// <returns>XML String representing the Metadata</returns>
-    public String GetMetadata(String courseId, int versionId, MetadataScope scope, MetadataFormat format) throws Exception
+    public CourseMetadata GetMetadata(String courseId, int versionId, MetadataScope scope, MetadataFormat format) throws Exception
     {
         ServiceRequest request = new ServiceRequest(configuration);
         request.getParameters().add("courseid", courseId);
@@ -413,11 +513,11 @@ public class CourseService
             request.getParameters().add("versionid", versionId);
         }
         request.getParameters().add("scope", scope.toString().toLowerCase());
-        request.getParameters().add("format", format.toString().toLowerCase());
+        request.getParameters().add("mdformat", format.toString().toLowerCase());
         Document response = request.callService("rustici.course.getMetadata");
-        
+
         // Return the subset of the xml starting with the top <object>
-        return XmlUtils.getXmlString(response.getElementsByTagName("object").item(0));
+        return CourseMetadata.parseFromXmlElement((Element)(response.getElementsByTagName("package").item(0)));
     }
 
     /// <summary>
@@ -428,29 +528,9 @@ public class CourseService
     /// <param name="format">Defines the amount of data to return:  Summary or Detailed</param>
     /// <returns>XML String representing the Metadata</returns>
 
-    public String GetMetadata(String courseId, MetadataScope scope, MetadataFormat format) throws Exception
+    public CourseMetadata GetMetadata(String courseId, MetadataScope scope, MetadataFormat format) throws Exception
     {
         return GetMetadata(courseId, Integer.MIN_VALUE, scope, format);
-    }
-
-    /// <summary>
-    /// Update course files only.  One or more course files can be updating them by
-    /// including them in a .zip file and sending updates via this method
-    /// </summary>
-    /// <param name="courseId">Unique Identifier for the course</param>
-    /// <param name="versionId">Specific version of the course</param>
-    /// <param name="absoluteFilePathToZip">Full path to the .zip file</param>
-    public List<ImportResult> UpdateAssets(String courseId, int versionId, String absoluteFilePathToZip) throws Exception
-    {
-    	List<ImportResult> res = null;
-        String location = manager.getUploadService().UploadFile(absoluteFilePathToZip, null);
-        try {
-            res = UpdateAssetsFromUploadedFile(courseId, versionId, location);
-        }
-        finally {
-            manager.getUploadService().DeleteFile(location);
-        }
-        return res;
     }
 
     /// <summary>
@@ -461,9 +541,35 @@ public class CourseService
     /// <param name="absoluteFilePathToZip">Full path to the .zip file</param>
     /// <remarks>If multiple versions of a course exist, only the latest version's assets will
     /// be updated.</remarks>
-    public List<ImportResult> UpdateAssets(String courseId, String absoluteFilePathToZip) throws Exception
+    public List<ImportResult> UpdateAssets(String courseId, String absoluteFilePathToZip, String userEmail, boolean useAsync) throws Exception
     {
-        return UpdateAssets(courseId, Integer.MIN_VALUE, absoluteFilePathToZip);
+    	if(useAsync){
+    		String token = this.UpdateAssetsAsync(courseId, absoluteFilePathToZip, userEmail, true);
+            return GetAsyncImportResults(token);		
+    	} else {
+    		ServiceRequest request = new ServiceRequest(configuration);
+            request.getParameters().add("courseid", courseId);
+            request.setFileToPost(absoluteFilePathToZip);
+            Document resp = request.callService("rustici.course.updateAssets");
+            return ImportResult.ConvertToImportResults(resp);
+    	}
+    }
+    
+	public String UpdateAssetsAsync(String courseId, String absoluteFilePathToZip, String userEmail, boolean finalizeSynchronously) throws Exception
+    {
+        ServiceRequest request = new ServiceRequest(configuration);
+        request.getParameters().add("courseid", courseId);
+        if(!Utils.isNullOrEmpty(userEmail))
+        	request.getParameters().add("email", userEmail);
+        if(finalizeSynchronously)
+        	request.getParameters().add("finalize", true);
+        request.setFileToPost(absoluteFilePathToZip);
+        
+        Document response = request.callService("rustici.course.updateAssetsAsync");
+        String tokenId = ((Element)response
+                                .getElementsByTagName("token").item(0))
+                                .getFirstChild().getTextContent();
+        return tokenId;
     }
 
     /// <summary>
@@ -775,15 +881,38 @@ public class CourseService
         return request.constructUrl("rustici.course.preview");
     }
 
-	/// <summary>
-    /// Check for the existence of a course on the SCORM cloud
-    /// </summary>
-    /// <param name="courseId">Unique Course Identifier</param>
-    public Boolean Exists(String courseId) throws Exception
-    {
+	public String GetAsyncImportUrl(String courseId, String redirectUrl, String userEmail, boolean finalizeSynchronously) throws Exception {
+		ServiceRequest request = new ServiceRequest(configuration);
+        request.getParameters().add("courseid", courseId);
+        if(!Utils.isNullOrEmpty(userEmail))
+        	request.getParameters().add("email", userEmail);
+        if(!Utils.isNullOrEmpty(redirectUrl))
+        	request.getParameters().add("redirecturl", redirectUrl);
+        if(finalizeSynchronously)
+        	request.getParameters().add("finalize", true);
+        return request.constructUrl("rustici.course.importCourseAsync");
+	}
+
+	public String GetUpdateUrl(String courseId, String redirectUrl, String userEmail) throws Exception {
+		ServiceRequest request = new ServiceRequest(configuration);
+        request.getParameters().add("courseid", courseId);
+        if(!Utils.isNullOrEmpty(userEmail))
+        	request.getParameters().add("email", userEmail);
+        if(!Utils.isNullOrEmpty(redirectUrl))
+        	request.getParameters().add("redirecturl", redirectUrl);
+        return request.constructUrl("rustici.course.updateAssets");
+	}
+	
+	public String GetAsyncUpdateUrl(String courseId, String redirectUrl, String userEmail, boolean finalizeSynchronously) throws Exception {
         ServiceRequest request = new ServiceRequest(configuration);
         request.getParameters().add("courseid", courseId);
-        Document response = request.callService("rustici.course.exists");
-		return Boolean.parseBoolean(((Element)response.getElementsByTagName("result").item(0)).getTextContent());
-    }
+        if(!Utils.isNullOrEmpty(userEmail))
+        	request.getParameters().add("email", userEmail);
+        if(!Utils.isNullOrEmpty(redirectUrl))
+        	request.getParameters().add("redirecturl", redirectUrl);
+        if(finalizeSynchronously)
+        	request.getParameters().add("finalize", true);
+        
+        return request.constructUrl("rustici.course.updateAssetsAsync");
+	}
 }

@@ -1,5 +1,6 @@
 package com.rusticisoftware.hostedengine.client;
 
+import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -126,22 +127,19 @@ public class ServiceRequest {
     }
 
     public String getFileResponseFromUrl(String toFileName, String url) throws Exception
-    {
-        byte[] responseBytes = getResponseFromUrl(url);
-        ByteArrayInputStream bis = new ByteArrayInputStream(responseBytes);
-        
+    {   
         File f = new File(toFileName);
         FileOutputStream fos = new FileOutputStream(f);
-        Utils.bufferedCopyStream(bis, fos);
-        fos.close();
-        
+        copyResponseFromUrlToStream(url, fos, true);
         return toFileName;
     }
     
     protected Document getXmlResponseFromUrl(String url) throws Exception
     {
         byte[] responseBytes = getResponseFromUrl(url);
+        //System.out.println(url);
         String responseText = new String(responseBytes, "UTF-8");
+        //System.out.println(responseText);
         return assertNoErrorAndReturnXmlDoc(responseText);
     }
     
@@ -152,7 +150,13 @@ public class ServiceRequest {
         return responseText;
     }
     
-    public byte[] getResponseFromUrl(String urlStr) throws Exception
+    public byte[] getResponseFromUrl(String urlStr) throws Exception {
+    	ByteArrayOutputStream responseBytes = new ByteArrayOutputStream();
+    	copyResponseFromUrlToStream(urlStr, responseBytes, true);
+    	return responseBytes.toByteArray();
+    }
+    
+    public void copyResponseFromUrlToStream(String urlStr, OutputStream out, boolean closeOutputStream) throws Exception
     {
         URL url = new URL(urlStr);
         int retries = 6;
@@ -175,16 +179,15 @@ public class ServiceRequest {
 		            responseStream = postFile(connection, "filedata", f);
 		        }
 		        
-		        ByteArrayOutputStream responseBytes = new ByteArrayOutputStream();
-		        Utils.bufferedCopyStream(responseStream, responseBytes);
-		        responseBytes.close();
-		        
-		        //System.err.println(new String(responseBytes.toByteArray(), "UTF-8"));
-		        
-		        return responseBytes.toByteArray();
-		        
+		        Utils.bufferedCopyStream(responseStream, out);
+		        out.flush();
+		        if(closeOutputStream){
+		        	out.close();
+		        }
+		        return;
 	        } 
 	        catch (IOException ioe) {
+	        	System.err.println(ioe.getMessage());
 	        	Thread.sleep(msWait);
 	        	retries--;
 	        	msWait *= 2;
@@ -348,16 +351,12 @@ public class ServiceRequest {
 		int requestLength = intro.length() + (int)(file.length()) + outro.length();
 		((HttpURLConnection)connection).setFixedLengthStreamingMode(requestLength);
 		
-		FileInputStream fis = new FileInputStream(file);
 		OutputStream out = connection.getOutputStream();
-		try{
-			out.write(intro.toString().getBytes());
-			Utils.bufferedCopyStream(new FileInputStream(file), out);
-			out.write(outro.toString().getBytes());
-		} finally {
-			fis.close();
-			out.close();
-		}
+		out.write(intro.toString().getBytes());
+		Utils.bufferedCopyStream(new FileInputStream(file), out);
+		out.write(outro.toString().getBytes());
+		out.close();
+		
 		return connection.getInputStream();
 	}
 }

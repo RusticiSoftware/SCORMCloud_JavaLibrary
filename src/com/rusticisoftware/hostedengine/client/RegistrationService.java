@@ -138,55 +138,6 @@ public class RegistrationService
 
         request.callService("rustici.registration.createRegistration");
     }
-
-    
-    /// <summary>
-    /// Create a new Registration (Instance of a user taking a course). This method is only applicable
-    /// to the SCORM Cloud App.
-    /// </summary>
-    /// <param name="registrationId">Unique Identifier for the registration</param>
-    /// <param name="courseId">Unique Identifier for the course</param>
-    /// <param name="versionId">Optional versionID, if Int32.MinValue, latest course version is used.</param>
-    /// <param name="learnerId">Unique Identifier for the learner</param>
-    /// <param name="learnerFirstName">Learner's first name</param>
-    /// <param name="learnerLastName">Learner's last name</param>
-    /// <param name="learnerLastName">Learner's email address</param>
-    /// <param name="resultsPostbackUrl">URL to which the server will post results back to</param>
-    /// <param name="authType">Type of Authentication used at results postback time</param>
-    /// <param name="postBackLoginName">If postback authentication is used, the logon name</param>
-    /// <param name="postBackLoginPassword">If postback authentication is used, the password</param>
-    /// <param name="resultsFormat">The Format of the results XML sent to the postback URL</param>
-    public void CreateSandboxRegistration(String registrationId, String courseId, String learnerId, 
-        String learnerFirstName, String learnerLastName, String email) throws Exception
-    {
-        ServiceRequest request = new ServiceRequest(configuration);
-        request.getParameters().add("sandbox", true);
-        request.getParameters().add("regid", registrationId);
-        request.getParameters().add("courseid", courseId);
-        request.getParameters().add("learnerid", learnerId);
-        request.getParameters().add("fname", learnerFirstName);
-        request.getParameters().add("lname", learnerLastName);
-        if(!Utils.isNullOrEmpty(email))
-        	request.getParameters().add("email", email);
-
-        /*
-        // Required on this signature but not by the actual service
-        request.getParameters().add("authtype", authType.toString().toLowerCase());
-        request.getParameters().add("resultsformat", resultsFormat.toString().toLowerCase());
-
-        // Optional:
-        	
-        if (!Utils.isNullOrEmpty(resultsPostbackUrl))
-            request.getParameters().add("postbackurl", resultsPostbackUrl);
-        if (!Utils.isNullOrEmpty(postBackLoginName))
-            request.getParameters().add("urlname", postBackLoginName);
-        if (!Utils.isNullOrEmpty(postBackLoginPassword))
-            request.getParameters().add("urlpass", postBackLoginPassword);
-        if (versionId != Integer.MIN_VALUE)
-            request.getParameters().add("versionid", versionId);*/
-
-        request.callService("rustici.registration.createRegistration");
-    }
     
 
     //TODO: Other overrides of createRegistration....

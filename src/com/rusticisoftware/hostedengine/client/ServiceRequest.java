@@ -252,6 +252,7 @@ public class ServiceRequest {
         allParams.put("appid", configuration.getAppId());
         allParams.put("method", methodName);
         allParams.put("ts", Utils.getFormattedTime(new Date()));
+        allParams.put("applib", "java");
         allParams.putAll(this.methodParameters);
         
         //Generate signature

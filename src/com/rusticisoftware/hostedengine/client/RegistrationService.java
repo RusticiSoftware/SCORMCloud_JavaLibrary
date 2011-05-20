@@ -502,7 +502,6 @@ public class RegistrationService
         ServiceRequest request = new ServiceRequest(configuration);
         request.getParameters().add("launchid", launchId);
         Document response = request.callService("rustici.registration.getLaunchInfo");
-        System.out.println(XmlUtils.getXmlString(response));
         Element launchInfoElem = ((Element)response.getElementsByTagName("launch").item(0));
         return new LaunchInfo(launchInfoElem);
     }

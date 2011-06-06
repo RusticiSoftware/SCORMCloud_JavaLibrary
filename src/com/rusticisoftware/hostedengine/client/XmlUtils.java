@@ -89,15 +89,22 @@ public class XmlUtils
         return docBuilder.parse(new ByteArrayInputStream(xmlString.getBytes("UTF-8")));
     }
     
-    private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'.'SSSZ");
-    static { sdf.setTimeZone(TimeZone.getTimeZone("UTC")); }
-    public static Date parseXmlDate(String xmlDate) throws Exception {
-    	if(xmlDate == null){
+    public static String xmlSerialize(Date date){
+    	if(date == null){
     		return null;
     	}
-    	synchronized(sdf){
-    		return sdf.parse(xmlDate);
-    	}
+    	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'.'SSSZ");
+    	sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+    	return sdf.format((Date)date);
+    }
+    
+    public static Date parseXmlDate(String xmlDateStr) throws Exception {
+    	if(xmlDateStr == null || xmlDateStr.trim().length() < 1){
+			return null;
+		}
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'.'SSSZ");
+    	sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+    	return sdf.parse(xmlDateStr);
     }
     
     public static String xmlEncode (String str)
@@ -174,6 +181,13 @@ public class XmlUtils
         }
         return val;
     }
+    
+    public static String getNamedTextElemXml(String tagName, String value){
+		if(value == null || value.trim().length() < 1){
+			return "<" + tagName + "/>";
+		}
+		return "<" + tagName + "><![CDATA[" + value + "]]></" + tagName + ">";
+	}
     
   /// <summary>
     /// Utility function to retrieve inner text of first elem with tag elementName, or null if not found

@@ -310,15 +310,34 @@ public class RegistrationService
     /// <returns></returns>
     public List<RegistrationData> GetRegistrationList(String regIdFilterRegex, String courseIdFilterRegex) throws Exception
     {
+    	return GetRegistrationList(regIdFilterRegex, courseIdFilterRegex, null, null);
+    }
+    
+    /// <summary>
+    /// Returns a list of registration id's along with their associated course
+    /// </summary>
+    /// <param name="regIdFilterRegex">Optional registration id filter</param>
+    /// <param name="courseIdFilterRegex">Option course id filter</param>
+    /// <returns></returns>
+    public List<RegistrationData> GetRegistrationList(String regIdFilterRegex, String courseIdFilterRegex, String courseId, String learnerId) throws Exception
+    {
         ServiceRequest request = new ServiceRequest(configuration);
         if (!Utils.isNullOrEmpty(regIdFilterRegex))
             request.getParameters().add("filter", regIdFilterRegex);
-        if (!Utils.isNullOrEmpty(courseIdFilterRegex))
+        
+        if (!Utils.isNullOrEmpty(courseId)){
+        	request.getParameters().add("courseid", courseId);
+        } else if (!Utils.isNullOrEmpty(courseIdFilterRegex)) {
             request.getParameters().add("coursefilter", courseIdFilterRegex);
+        }
+        
+        if (!Utils.isNullOrEmpty(learnerId)){
+        	request.getParameters().add("learnerid", learnerId);
+        }
         Document response = request.callService("rustici.registration.getRegistrationList");
 
         // Return the subset of the xml starting with the top <summary>
-        return RegistrationData.ConvertToRegistrationDataList(response);
+        return RegistrationData.parseListFromXml(response);
     }
 
     /// <summary>

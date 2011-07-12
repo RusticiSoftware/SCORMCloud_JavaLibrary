@@ -29,7 +29,6 @@
 package com.rusticisoftware.hostedengine.client;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;

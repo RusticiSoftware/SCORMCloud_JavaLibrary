@@ -28,8 +28,6 @@
 
 package com.rusticisoftware.hostedengine.client;
 
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -44,14 +42,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Random;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-
-import org.w3c.dom.*;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
-
-import com.rusticisoftware.hostedengine.client.ServiceException;
 
 
 public class ServiceRequest {
@@ -307,10 +302,10 @@ public class ServiceRequest {
             xmlDoc = XmlUtils.parseXmlString(xmlString);
         }
         catch (SAXParseException e1) {
-            throw new ServiceException(INVALID_WEB_SERVICE_RESPONSE, "Error parsing xml", e1);
+            throw new ServiceException(INVALID_WEB_SERVICE_RESPONSE, "Error parsing xml: " + xmlString, e1);
         }
         catch (SAXException e2) {
-            throw new ServiceException(INVALID_WEB_SERVICE_RESPONSE, "Some other error occurred processing xml response", e2);
+            throw new ServiceException(INVALID_WEB_SERVICE_RESPONSE, "Some other error occurred processing xml response: " + xmlString, e2);
         }
 		
 		try {

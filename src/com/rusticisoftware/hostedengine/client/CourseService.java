@@ -943,4 +943,11 @@ public class CourseService
         
         return request.constructUrl("rustici.course.updateAssetsAsync");
 	}
+	
+	public void UpdateCourseTitle(String courseId, String newTitle) throws Exception {
+		ServiceRequest request = new ServiceRequest(configuration);
+		request.getParameters().add("courseid", courseId);
+		request.getParameters().add("title", newTitle);
+		request.callService("rustici.course.updateCourseTitle");
+	}
 }

@@ -396,7 +396,7 @@ public class RegistrationService
     {
         ServiceRequest request = new ServiceRequest(configuration);
         request.getParameters().add("regid", registrationId);
-        request.getParameters().add("instanceid", "instanceId");
+        request.getParameters().add("instanceid", instanceId);
         request.callService("rustici.registration.deleteRegistration");
     }
 
@@ -560,4 +560,13 @@ public class RegistrationService
 
             request.callService("rustici.registration.testRegistrationPostUrl");
         }
+
+	public RegistrationData GetRegistrationDetail(String registrationId) throws Exception {
+		ServiceRequest sr = new ServiceRequest(configuration);
+		sr.getParameters().add("regid", registrationId);
+		Document xmlDoc = sr.callService("rustici.registration.getRegistrationDetail");
+		return RegistrationData.parseFromXmlElement(
+						XmlUtils.getFirstChildByTagName(
+								xmlDoc.getDocumentElement(), "registration"));
+	}
 }

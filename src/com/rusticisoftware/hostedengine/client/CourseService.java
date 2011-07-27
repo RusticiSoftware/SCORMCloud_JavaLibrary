@@ -31,6 +31,7 @@ package com.rusticisoftware.hostedengine.client;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -479,7 +480,7 @@ public class CourseService
     /// <param name="attributePairs">Map of name/value pairs</param>
     /// <returns>HashMap of changed attributes</returns>
     public HashMap<String, String> UpdateAttributes(String courseId, int versionId, 
-        HashMap<String,String> attributePairs) throws Exception
+        Map<String,String> attributePairs) throws Exception
     {
         ServiceRequest request = new ServiceRequest(configuration);
         request.getParameters().add("courseid", courseId);
@@ -519,7 +520,7 @@ public class CourseService
     /// <param name="courseId">Unique Identifier for the course</param>
     /// <param name="attributePairs">Map of name/value pairs</param>
     /// <returns>HashMap of changed attributes</returns>
-    public HashMap<String, String> UpdateAttributes(String courseId, HashMap<String, String> attributePairs) throws Exception
+    public HashMap<String, String> UpdateAttributes(String courseId, Map<String, String> attributePairs) throws Exception
     {
         return UpdateAttributes(courseId, Integer.MIN_VALUE, attributePairs);
     }
@@ -878,7 +879,7 @@ public class CourseService
     /// <param name="courseId">Unique Course Identifier</param>
     public String GetPreviewUrl(String courseId) throws Exception
     {
-        return GetPreviewUrl(courseId, null, null);
+        return GetPreviewUrl(courseId, null, null, -1);
     }
 
     /// <summary>
@@ -889,7 +890,7 @@ public class CourseService
     /// <param name="versionId">Version Id</param>
     public String GetPreviewUrl(String courseId, String redirectOnExitUrl) throws Exception
     {
-    	return GetPreviewUrl(courseId, redirectOnExitUrl, null);
+    	return GetPreviewUrl(courseId, redirectOnExitUrl, null, -1);
     }
 
     /// <summary>
@@ -898,7 +899,7 @@ public class CourseService
     /// </summary>
     /// <param name="courseId">Unique Course Identifier</param>
     /// <param name="versionId">Version Id</param>
-    public String GetPreviewUrl(String courseId, String redirectOnExitUrl, String cssUrl) throws Exception
+    public String GetPreviewUrl(String courseId, String redirectOnExitUrl, String cssUrl, int versionId) throws Exception
     {
         ServiceRequest request = new ServiceRequest(configuration);
         request.getParameters().add("courseid", courseId);
@@ -906,6 +907,9 @@ public class CourseService
             request.getParameters().add("redirecturl", redirectOnExitUrl);
         if(!Utils.isNullOrEmpty(cssUrl))
         	request.getParameters().add("cssurl", cssUrl);
+        if(versionId >= 0){
+        	request.getParameters().add("versionid", versionId);
+        }
         return request.constructUrl("rustici.course.preview");
     }
 
@@ -943,11 +947,12 @@ public class CourseService
         
         return request.constructUrl("rustici.course.updateAssetsAsync");
 	}
-	
-	public void UpdateCourseTitle(String courseId, String newTitle) throws Exception {
+
+	public CourseData GetCourseDetail(String courseId) throws Exception {
 		ServiceRequest request = new ServiceRequest(configuration);
-		request.getParameters().add("courseid", courseId);
-		request.getParameters().add("title", newTitle);
-		request.callService("rustici.course.updateCourseTitle");
+        request.getParameters().add("courseid", courseId);
+        Document xmlDoc = request.callService("rustici.course.getCourseDetail");
+        return CourseData.parseFromXmlElement(
+        		XmlUtils.getFirstChildByTagName(xmlDoc.getDocumentElement(), "course"));
 	}
 }

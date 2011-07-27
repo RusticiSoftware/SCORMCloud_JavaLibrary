@@ -44,6 +44,7 @@ public class RegistrationData {
 	public static class InstanceData {
 		private int instanceId;
 		private int courseVersion;
+		private Date updateDate;
 		
 		public InstanceData() {}
 		public int getInstanceId(){
@@ -58,6 +59,53 @@ public class RegistrationData {
 		public void setCourseVersion(int courseVersion){
 			this.courseVersion = courseVersion;
 		}
+		public Date getUpdateDate(){
+			return updateDate;
+		}
+		public void setUpdateDate(Date updateDate){
+			this.updateDate = updateDate;
+		}
+		
+		public String getXmlString(){
+			StringBuilder xml = new StringBuilder("<instance>");
+			xml.append(XmlUtils.getNamedTextElemXml("instanceId", String.valueOf(getInstanceId())));
+			xml.append(XmlUtils.getNamedTextElemXml("courseVersion", String.valueOf(getCourseVersion())));
+			xml.append(XmlUtils.getNamedTextElemXml("updateDate", XmlUtils.xmlSerialize(getUpdateDate())));
+			xml.append("</instance>");
+			return xml.toString();
+		}
+		
+		public static String getXmlString(ArrayList<InstanceData> instances) {
+			if(instances == null){
+				return "";
+			}
+			
+			StringBuilder xml = new StringBuilder();
+			xml.append("<instances>");
+			for(RegistrationData.InstanceData instanceData : instances){
+				xml.append(instanceData.getXmlString());
+			}
+			xml.append("</instances>");
+			return xml.toString();
+		}
+		
+		public static InstanceData parseFromXmlElement(Element elem){
+			int instanceId, courseVersion;
+			Date updateDate;
+			
+			try { instanceId = Integer.parseInt( XmlUtils.getChildElemText(elem, "instanceId") ); }
+			catch (Exception e) { instanceId = -1; }
+			try { courseVersion = Integer.parseInt( XmlUtils.getChildElemText(elem, "courseVersion") ); }
+			catch (Exception e) { courseVersion = -1; }
+			try { updateDate = XmlUtils.parseXmlDate( XmlUtils.getChildElemText(elem, "updateDate") ); }
+			catch (Exception e) { updateDate = new Date(); }
+
+			InstanceData instanceData = new InstanceData();
+			instanceData.setInstanceId(instanceId);
+			instanceData.setCourseVersion(courseVersion);
+			instanceData.setUpdateDate(updateDate);
+			return instanceData;
+		}
 	}
 	
 	
@@ -68,6 +116,7 @@ public class RegistrationData {
 	private String appId;
 	private String courseId;
 	private String courseTitle;
+	private int lastCourseVersionLaunched = 0;
 	private String learnerId;
 	private String learnerFirstName;
 	private String learnerLastName;
@@ -76,9 +125,6 @@ public class RegistrationData {
 	private Date firstAccessDate;
 	private Date lastAccessDate;
 	private Date completedDate;
-	
-	
-	
 	
 	public RegistrationData() {}
 	
@@ -100,6 +146,13 @@ public class RegistrationData {
 	}
 	public void setCourseTitle(String courseTitle){
 		this.courseTitle = courseTitle;
+	}
+	
+	public int getLastCourseVersionLaunched(){
+		return lastCourseVersionLaunched;
+	}
+	public void setLastCourseVersionLaunched(int lastCourseVersionLaunched){
+		this.lastCourseVersionLaunched = lastCourseVersionLaunched;
 	}
 	
 	public String getLearnerId() {
@@ -188,15 +241,12 @@ public class RegistrationData {
 	}
 	
 	public static RegistrationData parseFromXmlElement (Element elem) throws Exception {
-		String regId = elem.getAttribute("id");
-		String courseId = elem.getAttribute("courseid");
-		
-		
 		RegistrationData data = new RegistrationData();
 		data.setAppId(XmlUtils.getChildElemText(elem, "appId"));
 		data.setRegistrationId(XmlUtils.getChildElemText(elem, "registrationId"));
 		data.setCourseId(XmlUtils.getChildElemText(elem, "courseId"));
 		data.setCourseTitle(XmlUtils.getChildElemText(elem, "courseTitle"));
+		data.setLastCourseVersionLaunched(Integer.parseInt(XmlUtils.getChildElemText(elem, "lastCourseVersionLaunched")));
 		data.setLearnerId(XmlUtils.getChildElemText(elem, "learnerId"));
 		data.setLearnerFirstName(XmlUtils.getChildElemText(elem, "learnerFirstName"));
 		data.setLearnerLastName(XmlUtils.getChildElemText(elem, "learnerLastName"));
@@ -211,19 +261,10 @@ public class RegistrationData {
 		if(instancesList.getLength() > 0){
 			for(int i = 0; i < instancesList.getLength(); i++){
 				Element instance = (Element)instancesList.item(i);
-				
-				int instanceId, courseVersion;
-				try { instanceId = Integer.parseInt( instance.getAttribute("id") ); }
-				catch (Exception e) { instanceId = -1; }
-				try { courseVersion = Integer.parseInt( instance.getAttribute("courseversion") ); }
-				catch (Exception e) { courseVersion = -1; }
-
-				RegistrationData.InstanceData instanceData = new RegistrationData.InstanceData();
-				instanceData.setInstanceId(instanceId);
-				instanceData.setCourseVersion(courseVersion);
-				instances.add(instanceData);
+				instances.add(InstanceData.parseFromXmlElement(instance));
 			}
 		}
+		data.setInstances(instances);
 		
 		NodeList reportList = elem.getElementsByTagName("registrationreport");
 		if(reportList.getLength() > 0){
@@ -255,37 +296,40 @@ public class RegistrationData {
 		StringBuilder xml = new StringBuilder();
 		xml.append("<registrationlist>");
 		for(RegistrationData regData : regList){
-			xml.append("<registration id=\"" + Utils.xmlEncode(regData.getRegistrationId()) + "\" ");
-			xml.append("courseid=\"" + Utils.xmlEncode(regData.getCourseId()) + "\" ");
-			xml.append(">");
-			
-				xml.append(XmlUtils.getNamedTextElemXml("appId", regData.getAppId()));
-				xml.append(XmlUtils.getNamedTextElemXml("registrationId", regData.getRegistrationId()));
-				xml.append(XmlUtils.getNamedTextElemXml("courseId", regData.getCourseId()));
-				xml.append(XmlUtils.getNamedTextElemXml("courseTitle", regData.getCourseTitle()));
-				xml.append(XmlUtils.getNamedTextElemXml("learnerId", regData.getLearnerId()));
-				xml.append(XmlUtils.getNamedTextElemXml("learnerFirstName", regData.getLearnerFirstName()));
-				xml.append(XmlUtils.getNamedTextElemXml("learnerLastName", regData.getLearnerLastName()));
-				xml.append(XmlUtils.getNamedTextElemXml("email", regData.getEmail()));
-				xml.append(XmlUtils.getNamedTextElemXml("createDate", XmlUtils.xmlSerialize(regData.getCreateDate())));
-				xml.append(XmlUtils.getNamedTextElemXml("firstAccessDate", XmlUtils.xmlSerialize(regData.getFirstAccessDate())));
-				xml.append(XmlUtils.getNamedTextElemXml("lastAccessDate", XmlUtils.xmlSerialize(regData.getLastAccessDate())));
-				xml.append(XmlUtils.getNamedTextElemXml("completedDate", XmlUtils.xmlSerialize(regData.getCompletedDate())));				
-			
-				ArrayList<RegistrationData.InstanceData> instances = regData.getInstances();
-				xml.append("<instances>");
-				for(RegistrationData.InstanceData instanceData : instances){
-					xml.append("<instance id=\"" + instanceData.getInstanceId() + "\" courseversion=\"" + instanceData.getCourseVersion() + "\" />");
-				}
-				xml.append("</instances>");
-				
-				if(regData.getResultsData() != null){
-					xml.append(regData.getResultsData());
-				}	
-			
-			xml.append("</registration>");
+			xml.append(regData.getXmlString());
 		}
 		xml.append("</registrationlist>");
+		return xml.toString();
+	}
+
+	public String getXmlString() {
+		RegistrationData regData = this;
+		StringBuilder xml = new StringBuilder();
+		xml.append("<registration id=\"" + Utils.xmlEncode(regData.getRegistrationId()) + "\" ");
+		xml.append("courseid=\"" + Utils.xmlEncode(regData.getCourseId()) + "\" ");
+		xml.append(">");
+		
+			xml.append(XmlUtils.getNamedTextElemXml("appId", regData.getAppId()));
+			xml.append(XmlUtils.getNamedTextElemXml("registrationId", regData.getRegistrationId()));
+			xml.append(XmlUtils.getNamedTextElemXml("courseId", regData.getCourseId()));
+			xml.append(XmlUtils.getNamedTextElemXml("courseTitle", regData.getCourseTitle()));
+			xml.append(XmlUtils.getNamedTextElemXml("lastCourseVersionLaunched", String.valueOf(regData.getLastCourseVersionLaunched())));
+			xml.append(XmlUtils.getNamedTextElemXml("learnerId", regData.getLearnerId()));
+			xml.append(XmlUtils.getNamedTextElemXml("learnerFirstName", regData.getLearnerFirstName()));
+			xml.append(XmlUtils.getNamedTextElemXml("learnerLastName", regData.getLearnerLastName()));
+			xml.append(XmlUtils.getNamedTextElemXml("email", regData.getEmail()));
+			xml.append(XmlUtils.getNamedTextElemXml("createDate", XmlUtils.xmlSerialize(regData.getCreateDate())));
+			xml.append(XmlUtils.getNamedTextElemXml("firstAccessDate", XmlUtils.xmlSerialize(regData.getFirstAccessDate())));
+			xml.append(XmlUtils.getNamedTextElemXml("lastAccessDate", XmlUtils.xmlSerialize(regData.getLastAccessDate())));
+			xml.append(XmlUtils.getNamedTextElemXml("completedDate", XmlUtils.xmlSerialize(regData.getCompletedDate())));				
+		
+			xml.append(InstanceData.getXmlString(regData.getInstances()));
+			
+			if(regData.getResultsData() != null){
+				xml.append(regData.getResultsData());
+			}	
+		
+		xml.append("</registration>");
 		return xml.toString();
 	}
 }

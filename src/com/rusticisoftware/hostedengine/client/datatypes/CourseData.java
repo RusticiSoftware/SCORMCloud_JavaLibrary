@@ -29,6 +29,7 @@
 package com.rusticisoftware.hostedengine.client.datatypes;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.w3c.dom.Document;
@@ -38,9 +39,50 @@ import org.w3c.dom.NodeList;
 import com.rusticisoftware.hostedengine.client.Utils;
 import com.rusticisoftware.hostedengine.client.XmlUtils;
 
-
 public class CourseData {
 
+	public static class VersionInformation {
+		protected int versionId = 0;
+		public int getVersionId(){ return versionId; }
+		public void setVersionId(int versionId){ this.versionId = versionId; }
+		
+		protected Date updateDate = new Date();
+		public Date getUpdateDate(){ return updateDate; }
+		public void setUpdateDate(Date updateDate){ this.updateDate = updateDate; }
+		
+		public VersionInformation(){}
+		
+		public String getXmlString (){
+			StringBuilder sb = new StringBuilder("<version>");
+			sb.append(XmlUtils.getNamedTextElemXml("versionId", String.valueOf(versionId)));
+			sb.append(XmlUtils.getNamedTextElemXml("updateDate", XmlUtils.xmlSerialize(updateDate)));
+			sb.append("</version>");
+			return sb.toString();
+		}
+		
+		public static String getXmlString(List<VersionInformation> versions) {
+			if(versions == null){
+				return "";
+			}
+			
+			StringBuilder sb = new StringBuilder("<versions>");
+			for(VersionInformation version : versions){
+				sb.append(version.getXmlString());
+			}
+			sb.append("</versions>");
+			return sb.toString();
+		}
+
+		public static VersionInformation parseFromXmlElement(Element versionElem) throws Exception {
+			int versionId = Integer.parseInt(XmlUtils.getChildElemText(versionElem, "versionId"));
+			Date updateDate = XmlUtils.parseXmlDate(XmlUtils.getChildElemText(versionElem, "updateDate"));
+			VersionInformation version = new VersionInformation();
+			version.setVersionId(versionId);
+			version.setUpdateDate(updateDate);
+			return version;
+		}
+	}
+	
 	private String appId;
 	private String courseId;
 	private int numberOfVersions;
@@ -48,6 +90,7 @@ public class CourseData {
 	private String title;
 	private long size;
 	private List<String> tags;
+	private List<VersionInformation> versions;
 
 
 	public CourseData() {
@@ -108,16 +151,23 @@ public class CourseData {
 	public void setTags(List<String> tags){
 		this.tags = tags;
 	}
+	
+	public List<VersionInformation> getVersions(){
+		return versions;
+	}
+	public void setVersions(List<VersionInformation> versions){
+		this.versions = versions;
+	}
 
 	public static CourseData parseFromXmlElement (Element courseElem) throws Exception {
 		String id = courseElem.getAttribute("id");
 		String title = courseElem.getAttribute("title");
-		String versions = courseElem.getAttribute("versions");
+		String numVersionStr = courseElem.getAttribute("versions");
 		String regs = courseElem.getAttribute("registrations");
 		String sizeStr = courseElem.getAttribute("size");
 		
 		int numVersions = 0;
-		try { numVersions = Integer.parseInt(versions); }
+		try { numVersions = Integer.parseInt(numVersionStr); }
 		catch (Exception e) {}
 		
 		int numRegistrations = 0;
@@ -135,6 +185,17 @@ public class CourseData {
 		data.setNumberOfVersions(numVersions);
 		data.setNumberOfRegistrations(numRegistrations);
 		data.setSize(size);
+		
+		List<VersionInformation> versions = new ArrayList<VersionInformation>();
+		Element versionsElem = XmlUtils.getFirstChildByTagName(courseElem, "versions");
+		if(versionsElem != null){
+			List<Element> versionElems = XmlUtils.getChildrenByTagName(versionsElem, "version");
+			for(Element versionElem : versionElems){
+				versions.add(VersionInformation.parseFromXmlElement(versionElem));
+			}
+			data.setNumberOfVersions(versionElems.size());
+		}
+		data.setVersions(versions);
 		
 		List<String> tags = new ArrayList<String>();
 		Element tagsElem = XmlUtils.getFirstChildByTagName(courseElem, "tags");
@@ -165,22 +226,30 @@ public class CourseData {
 		StringBuilder xml = new StringBuilder();
 		xml.append("<courselist>");
 		for(CourseData data : courseList){
-			xml.append("<course id=\"" + Utils.xmlEncode(data.getCourseId()) + "\" ");
-			xml.append("title=\"" + Utils.xmlEncode(data.getTitle()) + "\" ");
-			xml.append("versions=\"" + data.getNumberOfVersions() + "\" ");
-			xml.append("registrations=\"" + data.getNumberOfRegistrations() + "\" ");
-			xml.append("size=\"" + data.getSize() + "\" ");
-			xml.append(">");
-			xml.append("<tags>");
-			if(data.getTags() != null && data.getTags().size() > 0){
-				for(String tag : data.getTags()){
-					xml.append("<tag><![CDATA[" + tag + "]]></tag>");
-				}
-			}
-			xml.append("</tags>");
-			xml.append("</course>");
+			xml.append(data.getXmlString());
 		}
 		xml.append("</courselist>");
+		return xml.toString();
+	}
+
+	public String getXmlString() {
+		CourseData data = this;
+		StringBuilder xml = new StringBuilder();
+		xml.append("<course id=\"" + Utils.xmlEncode(data.getCourseId()) + "\" ");
+		xml.append("title=\"" + Utils.xmlEncode(data.getTitle()) + "\" ");
+		xml.append("versions=\"" + data.getNumberOfVersions() + "\" ");
+		xml.append("registrations=\"" + data.getNumberOfRegistrations() + "\" ");
+		xml.append("size=\"" + data.getSize() + "\" ");
+		xml.append(">");
+		xml.append(VersionInformation.getXmlString(data.getVersions()));
+		xml.append("<tags>");
+		if(data.getTags() != null && data.getTags().size() > 0){
+			for(String tag : data.getTags()){
+				xml.append("<tag><![CDATA[" + tag + "]]></tag>");
+			}
+		}
+		xml.append("</tags>");
+		xml.append("</course>");
 		return xml.toString();
 	}
 }

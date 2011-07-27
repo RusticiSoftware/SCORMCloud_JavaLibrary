@@ -162,7 +162,7 @@ public class ServiceRequest {
         byte[] responseBytes = getResponseFromUrl(url);
         //System.out.println(url);
         String responseText = new String(responseBytes, "UTF-8");
-        //System.out.println(responseText);
+        System.out.println(responseText);
         return assertNoErrorAndReturnXmlDoc(responseText);
     }
     

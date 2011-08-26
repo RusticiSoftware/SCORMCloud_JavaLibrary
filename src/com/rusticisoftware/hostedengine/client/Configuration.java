@@ -33,18 +33,21 @@ public class Configuration
     private String appId = null;
     private String securityKey = null;
     private String scormEngineServiceUrl = null;
+    private String origin = "rusticisoftware.javalibrary.1.1.2";
 
     /// <summary>
-    /// Single constuctor that contains the required properties
+    /// Single constructor that contains the required properties
     /// </summary>
     /// <param name="scormEngineServiceUrl">URL to the service, ex: http://services.scorm.com/EngineWebServices</param>
     /// <param name="appId">The Application ID obtained by registering with the SCORM Engine Service</param>
     /// <param name="securityKey">The security key (password) linked to the application ID</param>
-    public Configuration(String scormEngineServiceUrl, String appId, String securityKey)
+    /// <param name="origin">The origin string that defines the organization, application name and version</param>
+    public Configuration(String scormEngineServiceUrl, String appId, String securityKey, String origin)
     {
         this.appId = appId;
         this.securityKey = securityKey;
         this.scormEngineServiceUrl = scormEngineServiceUrl;
+        this.origin = origin;
     }
     
     /// <summary>
@@ -82,4 +85,17 @@ public class Configuration
     {
         this.scormEngineServiceUrl = scormEngineServiceUrl;
     } 
+    
+    /// <summary>
+    /// The origin string that defines the organization, application name and version
+ 	/// of the software accessing the Cloud service.
+    /// </summary>
+    public String getOrigin()
+    {
+    	return origin;
+    }
+    public void setOrigin(String origin)
+    {
+    	this.origin = origin;
+    }
 }

@@ -245,6 +245,7 @@ public class ServiceRequest {
         
         ParameterMap allParams = new ParameterMap();
         allParams.put("appid", configuration.getAppId());
+        allParams.put("origin", configuration.getOrigin());
         allParams.put("method", methodName);
         allParams.put("ts", Utils.getFormattedTime(new Date()));
         allParams.put("applib", "java");

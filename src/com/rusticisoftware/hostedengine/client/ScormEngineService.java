@@ -183,6 +183,11 @@ public class ScormEngineService
     {
             return configuration.getScormEngineServiceUrl();
     }
+    
+    public String getOrigin()
+    {
+    	return configuration.getOrigin();
+    }
 
     public ServiceRequest CreateNewRequest()
     {

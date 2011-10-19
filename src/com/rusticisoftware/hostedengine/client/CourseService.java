@@ -723,22 +723,30 @@ public class CourseService
     /// </summary>
     /// <param name="courseId">Unique Identifier for the course</param>
     /// <returns>Signed URL to package property editor</returns>
-    /// <param name="notificationFrameUrl">Tells the property editor to render a sub-iframe
-    /// with the provided url as the src.  This can be used to simulate an "onload"
-    /// by using a notificationFrameUrl that's the same domain as the host system and
-    /// calling parent.parent.method()</param>
-    public String GetPropertyEditorUrl(String courseId, String stylesheetUrl, String notificationFrameUrl) throws Exception
+    public String GetPropertyEditorUrl(String courseId) throws Exception
     {
-        // The local parameter map just contains method methodgetParameters().  We'll
+        return GetPropertyEditorUrl(courseId, null, -1);
+    }
+    
+    public String GetPropertyEditorUrl(String courseId, String stylesheetUrl) throws Exception {
+    	return GetPropertyEditorUrl(courseId, stylesheetUrl, -1);
+    }
+    
+    public String GetPropertyEditorUrl(String courseId, String stylesheetUrl, int editorVersion) throws Exception {
+    	String editorVersionStr = "latest";
+    	if(editorVersion > 0){
+    		editorVersionStr = String.valueOf(editorVersion);
+    	}
+    	
+    	// The local parameter map just contains method methodgetParameters().  We'll
         // now create a complete parameter map that contains the web-service
         // params as well the actual method params.
         ServiceRequest.ParameterMap parameterMap = new ServiceRequest.ParameterMap();
         parameterMap.add("action", "properties.view");
         parameterMap.add("package", "AppId|" + configuration.getAppId() + "!PackageId|" + courseId);
         parameterMap.add("appid", configuration.getAppId());
+        parameterMap.add("editor", editorVersionStr);
         parameterMap.add("ts", Utils.getFormattedTime(new Date()));
-        if (!Utils.isNullOrEmpty(notificationFrameUrl))
-            parameterMap.add("notificationframesrc", notificationFrameUrl);
         if (!Utils.isNullOrEmpty(stylesheetUrl))
             parameterMap.add("stylesheet", stylesheetUrl);
         
@@ -761,17 +769,6 @@ public class CourseService
         //Cut off trailing ampersand
         paramStr.deleteCharAt(paramStr.length() - 1);
         return configuration.getScormEngineServiceUrl() + "/widget?" + paramStr.toString();
-    }
-
-    /// <summary>
-    /// Gets the url to view/edit the package properties for this course.  Typically
-    /// used within an IFRAME
-    /// </summary>
-    /// <param name="courseId">Unique Identifier for the course</param>
-    /// <returns>Signed URL to package property editor</returns>
-    public String GetPropertyEditorUrl(String courseId) throws Exception
-    {
-        return GetPropertyEditorUrl(courseId, null, null);
     }
 
     public String GetAssets(String toFileName, String courseId) throws Exception

@@ -190,6 +190,8 @@ public class ServiceRequest {
         	try {
 	        	
 		        URLConnection connection = url.openConnection();
+		        connection.setConnectTimeout(5000);
+		        connection.setReadTimeout(30000);
 		        connection.setDoOutput(true);
 		        connection.setDoInput(true);
 		        connection.setUseCaches(false);

@@ -36,7 +36,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
-import com.rusticisoftware.hostedengine.client.Utils;
 import com.rusticisoftware.hostedengine.client.XmlUtils;
 
 public class RegistrationData {
@@ -240,6 +239,15 @@ public class RegistrationData {
 		return this.resultsData;
 	}
 	
+
+	private String tinCanRegistrationId;
+	public void setTinCanRegistrationId(String tinCanRegistrationId) {
+		this.tinCanRegistrationId = tinCanRegistrationId;
+	}
+	public String getTinCanRegistrationId(){
+		return this.tinCanRegistrationId;
+	}
+	
 	public static RegistrationData parseFromXmlElement (Element elem) throws Exception {
 		RegistrationData data = new RegistrationData();
 		data.setAppId(XmlUtils.getChildElemText(elem, "appId"));
@@ -255,6 +263,7 @@ public class RegistrationData {
 		data.setFirstAccessDate(XmlUtils.parseXmlDate(XmlUtils.getChildElemText(elem, "getFirstAccessDate")));
 		data.setLastAccessDate(XmlUtils.parseXmlDate(XmlUtils.getChildElemText(elem, "getLastAccessDate")));
 		data.setCompletedDate(XmlUtils.parseXmlDate(XmlUtils.getChildElemText(elem, "completedDate")));
+		data.setTinCanRegistrationId(XmlUtils.getChildElemText(elem, "tinCanRegistrationId"));
 		
 		ArrayList<RegistrationData.InstanceData> instances = data.getInstances();
 		NodeList instancesList = elem.getElementsByTagName("instance");
@@ -305,8 +314,8 @@ public class RegistrationData {
 	public String getXmlString() {
 		RegistrationData regData = this;
 		StringBuilder xml = new StringBuilder();
-		xml.append("<registration id=\"" + Utils.xmlEncode(regData.getRegistrationId()) + "\" ");
-		xml.append("courseid=\"" + Utils.xmlEncode(regData.getCourseId()) + "\" ");
+		xml.append("<registration id=\"" + XmlUtils.xmlEncode(regData.getRegistrationId()) + "\" ");
+		xml.append("courseid=\"" + XmlUtils.xmlEncode(regData.getCourseId()) + "\" ");
 		xml.append(">");
 		
 			xml.append(XmlUtils.getNamedTextElemXml("appId", regData.getAppId()));
@@ -321,7 +330,11 @@ public class RegistrationData {
 			xml.append(XmlUtils.getNamedTextElemXml("createDate", XmlUtils.xmlSerialize(regData.getCreateDate())));
 			xml.append(XmlUtils.getNamedTextElemXml("firstAccessDate", XmlUtils.xmlSerialize(regData.getFirstAccessDate())));
 			xml.append(XmlUtils.getNamedTextElemXml("lastAccessDate", XmlUtils.xmlSerialize(regData.getLastAccessDate())));
-			xml.append(XmlUtils.getNamedTextElemXml("completedDate", XmlUtils.xmlSerialize(regData.getCompletedDate())));				
+			xml.append(XmlUtils.getNamedTextElemXml("completedDate", XmlUtils.xmlSerialize(regData.getCompletedDate())));		
+			
+			if(regData.getTinCanRegistrationId() != null){
+				xml.append(XmlUtils.getNamedTextElemXml("tinCanRegistrationId", regData.getTinCanRegistrationId()));
+			}
 		
 			xml.append(InstanceData.getXmlString(regData.getInstances()));
 			
@@ -332,4 +345,5 @@ public class RegistrationData {
 		xml.append("</registration>");
 		return xml.toString();
 	}
+
 }

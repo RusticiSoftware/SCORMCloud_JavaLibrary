@@ -91,6 +91,9 @@ public class CourseData {
 	private long size;
 	private List<String> tags;
 	private List<VersionInformation> versions;
+	
+	private String learningStandard;
+	private String tinCanActivityId;
 
 
 	public CourseData() {
@@ -158,6 +161,20 @@ public class CourseData {
 	public void setVersions(List<VersionInformation> versions){
 		this.versions = versions;
 	}
+	
+	public String getLearningStandard(){
+		return learningStandard;
+	}
+	public void setLearningStandard(String learningStandard){
+		this.learningStandard = learningStandard;
+	}
+	
+	public String getTinCanActivityId(){
+		return tinCanActivityId;
+	}
+	public void setTinCanActivityId(String tinCanActivityId){
+		this.tinCanActivityId = tinCanActivityId;
+	}
 
 	public static CourseData parseFromXmlElement (Element courseElem) throws Exception {
 		String id = courseElem.getAttribute("id");
@@ -207,6 +224,9 @@ public class CourseData {
 		}
 		data.setTags(tags);
 		
+		data.setLearningStandard(XmlUtils.getChildElemText(courseElem, "learningStandard"));
+		data.setTinCanActivityId(XmlUtils.getChildElemText(courseElem, "tinCanActivityId"));
+		
 		return data;
 	}
 	
@@ -235,8 +255,8 @@ public class CourseData {
 	public String getXmlString() {
 		CourseData data = this;
 		StringBuilder xml = new StringBuilder();
-		xml.append("<course id=\"" + Utils.xmlEncode(data.getCourseId()) + "\" ");
-		xml.append("title=\"" + Utils.xmlEncode(data.getTitle()) + "\" ");
+		xml.append("<course id=\"" + XmlUtils.xmlEncode(data.getCourseId()) + "\" ");
+		xml.append("title=\"" + XmlUtils.xmlEncode(data.getTitle()) + "\" ");
 		xml.append("versions=\"" + data.getNumberOfVersions() + "\" ");
 		xml.append("registrations=\"" + data.getNumberOfRegistrations() + "\" ");
 		xml.append("size=\"" + data.getSize() + "\" ");
@@ -249,6 +269,12 @@ public class CourseData {
 			}
 		}
 		xml.append("</tags>");
+		if(data.getLearningStandard() != null && data.getLearningStandard().length() > 0){
+			xml.append(XmlUtils.getNamedTextElemXml("learningStandard", data.getLearningStandard()));
+		}
+		if(data.getTinCanActivityId() != null && data.getTinCanActivityId().length() > 0){
+			xml.append(XmlUtils.getNamedTextElemXml("tinCanActivityId", data.getTinCanActivityId()));
+		}
 		xml.append("</course>");
 		return xml.toString();
 	}

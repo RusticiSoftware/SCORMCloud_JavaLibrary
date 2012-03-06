@@ -9,12 +9,22 @@
     <tstamp>
         <format property="timestamp.isoformat" pattern="yyyy-MM-dd'T'HH:mm:ss"/>
     </tstamp>
-    <target name="revision" unless="svn.revision">
-        <exec executable="svnversion" outputproperty="svn.revision">
-            <arg value="."/>
+	
+    <target name="revision" unless="git.revision">
+        <exec executable="git" outputproperty="git.revision">
+            <arg value="rev-parse" />
+            <arg value="--short=5" />
+            <arg value="HEAD" />
         </exec>
-        <echo message="_REVISION_=${svn.revision}"/>
+        <exec executable="git" outputproperty="git.branch">
+            <arg value="name-rev" />
+            <arg value="--name-only" />
+            <arg value="--always" />
+            <arg value="${git.revision}" />
+        </exec>
+        <echo message="At revision ${git.revision} on branch ${git.branch}." />
     </target>
+
     <target name="package" depends="compile,revision">
         <mkdir dir="${jar.dir}"/>
         <jar destfile="${jar.dir}/${ant.project.name}.jar" index="true">
@@ -24,6 +34,8 @@
             <manifest>
                 <attribute name="Built-By" value="${user.name}"/>
                 <attribute name="Built-On" value="${timestamp.isoformat}"/>
+                <attribute name="Git-Branch" value="${git.branch}" />
+                <attribute name="Git-Revision" value="${git.revision}"/>
             </manifest>
         </jar>
     </target>

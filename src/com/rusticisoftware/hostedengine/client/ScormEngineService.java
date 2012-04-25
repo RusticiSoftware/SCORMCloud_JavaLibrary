@@ -40,6 +40,7 @@ public class ScormEngineService
     private TaggingService taggingService = null;
     private DispatchService dispatchService = null;
     private DebugService debugService = null;
+    private InvitationService invitationService = null;
 
     /// <summary>
     /// SCORM Engine Service constructor that that takes the three required properties.
@@ -62,6 +63,7 @@ public class ScormEngineService
         configuration = config;
         courseService = new CourseService(configuration, this);
         registrationService = new RegistrationService(configuration, this);
+        invitationService = new InvitationService(configuration, this);
         uploadService = new UploadService(configuration, this);
         ftpService = new FtpService(configuration, this);
         exportService = new ExportService(configuration, this);
@@ -87,6 +89,14 @@ public class ScormEngineService
         return registrationService;
     }
 
+
+    /// <summary>
+    /// SCORM Cloud invitation functionality.
+    /// </summary>
+    public InvitationService getInvitationService()
+    {
+        return invitationService;
+    }
 
     /// <summary>
     /// Contains all SCORM Engine Upload/File Management functionality.

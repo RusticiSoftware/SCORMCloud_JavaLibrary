@@ -29,6 +29,7 @@
 package com.rusticisoftware.hostedengine.client;
 
 import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -38,8 +39,10 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.URLEncoder;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 
 import org.w3c.dom.Document;
@@ -78,6 +81,7 @@ public class ServiceRequest {
 	private String fileToPost = null;
 	private Configuration configuration = null;
 	private String engineServiceUrl = null;
+	private Boolean usePost = false;
 
 	
 	public ServiceRequest (Configuration configuration) {
@@ -133,53 +137,94 @@ public class ServiceRequest {
 	{
 		this.engineServiceUrl = this.engineServiceUrl.replaceFirst(getProtocol(), protocol); 
 	}
+
+	public void setUsePost(Boolean usePost) {
+		this.usePost = usePost;
+	}
+
+	public Boolean getUsePost() {
+		return usePost;
+	}
+	
 	
 	public Document callService(String methodName) throws Exception
 	{
-	    return getXmlResponseFromUrl(constructUrl(methodName));
+		if (usePost) {
+			return getXmlResponseFromUrl(getAPIUrl(), constructParameterString(methodName));
+		}
+		else {
+			return getXmlResponseFromUrl(constructUrl(methodName));
+		}
 	}
 	
 	public String getStringFromService(String methodName) throws Exception
     {
-        return getStringResponseFromUrl(constructUrl(methodName));
+		if (usePost) {
+			return getStringResponseFromUrl(getAPIUrl(), constructParameterString(methodName));
+		}
+		else {
+			return getStringResponseFromUrl(constructUrl(methodName));
+		}
     }
 
 	public String getFileFromService(String toFileName, String methodName) throws Exception
     {
-        return getFileResponseFromUrl(toFileName, constructUrl(methodName));
+		if (usePost) {
+			return getFileResponseFromUrl(toFileName, getAPIUrl(), constructParameterString(methodName));
+		}
+		else {
+			return getFileResponseFromUrl(toFileName,constructUrl(methodName));
+		}
     }
 
-    public String getFileResponseFromUrl(String toFileName, String url) throws Exception
+    public String getFileResponseFromUrl(String toFileName, String url) throws Exception {
+    	return getFileResponseFromUrl(toFileName, url, null);
+    }
+    public String getFileResponseFromUrl(String toFileName, String url, String postData) throws Exception
     {   
         File f = new File(toFileName);
         FileOutputStream fos = new FileOutputStream(f);
-        copyResponseFromUrlToStream(url, fos, true);
+        copyResponseFromUrlToStream(url, fos, postData, true);
         return toFileName;
     }
     
-    protected Document getXmlResponseFromUrl(String url) throws Exception
+    protected Document getXmlResponseFromUrl(String url) throws Exception {
+    	return getXmlResponseFromUrl(url, null);
+    }
+    protected Document getXmlResponseFromUrl(String url, String postData) throws Exception
     {
-        byte[] responseBytes = getResponseFromUrl(url);
+        byte[] responseBytes = getResponseFromUrl(url, postData);
         //System.out.println(url);
         String responseText = new String(responseBytes, "UTF-8");
         //System.out.println(responseText);
         return assertNoErrorAndReturnXmlDoc(responseText);
     }
     
-    protected String getStringResponseFromUrl(String url) throws Exception
+    protected String getStringResponseFromUrl(String url) throws Exception {
+    	return getStringResponseFromUrl(url, null);
+    }
+    protected String getStringResponseFromUrl(String url, String postData) throws Exception
     {
-        byte[] responseBytes = getResponseFromUrl(url);
+        byte[] responseBytes = getResponseFromUrl(url, postData);
         String responseText = new String(responseBytes, "UTF-8");
         return responseText;
     }
     
     public byte[] getResponseFromUrl(String urlStr) throws Exception {
+    	return getResponseFromUrl(urlStr, null);
+    }
+    public byte[] getResponseFromUrl(String urlStr, String postData) throws Exception {
     	ByteArrayOutputStream responseBytes = new ByteArrayOutputStream();
-    	copyResponseFromUrlToStream(urlStr, responseBytes, true);
+    	copyResponseFromUrlToStream(urlStr, responseBytes, postData, true);
     	return responseBytes.toByteArray();
     }
     
     public void copyResponseFromUrlToStream(String urlStr, OutputStream out, boolean closeOutputStream) throws Exception
+    {
+    	copyResponseFromUrlToStream(urlStr, out, null, closeOutputStream);
+    }
+    
+    public void copyResponseFromUrlToStream(String urlStr, OutputStream out, String postData, boolean closeOutputStream) throws Exception
     {
         URL url = new URL(urlStr);
         int retries = 6;
@@ -197,7 +242,20 @@ public class ServiceRequest {
 		        connection.setUseCaches(false);
 
 		        if(getFileToPost() == null){
-		            responseStream = connection.getInputStream();
+		        	if (postData != null) {
+						((HttpURLConnection) connection).setRequestMethod("POST");
+						connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+						connection.setRequestProperty("Content-Length", "" + Integer.toString(postData.getBytes().length));
+						DataOutputStream wr = new DataOutputStream (connection.getOutputStream ());
+						try {
+							wr.writeBytes (postData);
+							wr.flush ();
+							}
+						finally {
+							wr.close ();
+						}
+		        	}
+	        		responseStream = connection.getInputStream();
 		        }
 		        else {
 		            File f = new File(getFileToPost());
@@ -236,15 +294,7 @@ public class ServiceRequest {
         return xml;
     }
 
-    /// <summary>
-    /// Given the method name and the parameters and configuration associated 
-    /// with this object, generate the full URL for the web service invocation.
-    /// </summary>
-    /// <param name="methodName">Method name for the HOSTED Engine api call</param>
-    /// <returns>Fully qualified URL to be used for invocation</returns>
-    public String constructUrl(String methodName) throws Exception
-    {
-        
+    private String constructParameterString(String methodName) throws Exception{
         ParameterMap allParams = new ParameterMap();
         allParams.put("appid", configuration.getAppId());
         allParams.put("origin", configuration.getOrigin());
@@ -272,7 +322,22 @@ public class ServiceRequest {
         
         //Cut off trailing ampersand
         paramStr.deleteCharAt(paramStr.length() - 1);
-        return engineServiceUrl + "/api?" + paramStr.toString();
+        return paramStr.toString();
+    }
+    
+    /// <summary>
+    /// Given the method name and the parameters and configuration associated 
+    /// with this object, generate the full URL for the web service invocation.
+    /// </summary>
+    /// <param name="methodName">Method name for the HOSTED Engine api call</param>
+    /// <returns>Fully qualified URL to be used for invocation</returns>
+    public String constructUrl(String methodName) throws Exception
+    {
+        return getAPIUrl() + "?" + constructParameterString(methodName).toString();
+    }
+    
+    private String getAPIUrl() {
+    	return engineServiceUrl + "/api";
     }
 	
 	protected void raiseServiceExceptionIfPresent(Document xmlResponse) throws ServiceException {

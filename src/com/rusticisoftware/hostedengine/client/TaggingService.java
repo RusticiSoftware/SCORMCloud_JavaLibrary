@@ -38,7 +38,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 public class TaggingService {
-	private static final Logger log = Logger.getLogger(UploadService.class.toString());
+	private static final Logger log = Logger.getLogger(DebugService.class.toString());
 	
     private Configuration configuration = null;
     private ScormEngineService manager = null;

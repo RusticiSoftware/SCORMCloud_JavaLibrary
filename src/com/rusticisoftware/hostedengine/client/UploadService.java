@@ -41,7 +41,7 @@ import com.rusticisoftware.hostedengine.client.datatypes.UploadToken;
 
 public class UploadService
 {
-	private static final Logger log = Logger.getLogger(UploadService.class.toString());
+	private static final Logger log = Logger.getLogger(UploadService.class.getName());
 	
     private Configuration configuration = null;
     private ScormEngineService manager = null;

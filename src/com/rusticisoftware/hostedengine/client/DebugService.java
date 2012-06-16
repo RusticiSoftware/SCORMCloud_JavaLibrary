@@ -37,7 +37,7 @@ import org.w3c.dom.Element;
 
 public class DebugService
 {
-	private static final Logger log = Logger.getLogger(UploadService.class.toString());
+	private static final Logger log = Logger.getLogger(DebugService.class.getName());
 	
     private Configuration configuration = null;
     private ScormEngineService manager = null;

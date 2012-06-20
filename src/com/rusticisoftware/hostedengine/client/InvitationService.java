@@ -81,19 +81,19 @@ public class InvitationService
         }
         
         if (postbackUrl != null) {
-            request.getParameters().add("postbackUrl", postbackUrl);
+            request.getParameters().add("postbackurl", postbackUrl);
         }
         if (authType != null) {
-            request.getParameters().add("authType", authType);
+            request.getParameters().add("authtype", authType);
         }
         if (urlName != null) {
-            request.getParameters().add("urlName", urlName);
+            request.getParameters().add("urlname", urlName);
         }
         if (urlPass != null) {
-            request.getParameters().add("urlPass", urlPass);
+            request.getParameters().add("urlpass", urlPass);
         }
         if (resultsFormat != null) {
-            request.getParameters().add("resultsFormat", resultsFormat);
+            request.getParameters().add("resultsformat", resultsFormat);
         }
         
         if (extendedParameters != null) {

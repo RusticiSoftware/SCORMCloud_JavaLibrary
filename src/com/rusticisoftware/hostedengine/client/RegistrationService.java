@@ -28,12 +28,12 @@
 
 package com.rusticisoftware.hostedengine.client;
 
+import java.util.Date;
 import java.util.List;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 import com.rusticisoftware.hostedengine.client.datatypes.LaunchInfo;
 import com.rusticisoftware.hostedengine.client.datatypes.RegistrationData;
 import com.rusticisoftware.hostedengine.client.datatypes.RegistrationSummary;
@@ -321,6 +321,18 @@ public class RegistrationService
     /// <returns></returns>
     public List<RegistrationData> GetRegistrationList(String regIdFilterRegex, String courseIdFilterRegex, String courseId, String learnerId) throws Exception
     {
+    	return GetRegistrationList(regIdFilterRegex, courseIdFilterRegex, courseId, learnerId, null, null);
+    }
+
+    /// <summary>
+    /// Returns a list of registration id's along with their associated course
+    /// </summary>
+    /// <param name="regIdFilterRegex">Optional registration id filter</param>
+    /// <param name="courseIdFilterRegex">Option course id filter</param>
+    /// <
+    /// <returns></returns>
+    public List<RegistrationData> GetRegistrationList(String regIdFilterRegex, String courseIdFilterRegex, String courseId, String learnerId, Date after, Date until) throws Exception
+    {
         ServiceRequest request = new ServiceRequest(configuration);
         if (!Utils.isNullOrEmpty(regIdFilterRegex))
             request.getParameters().add("filter", regIdFilterRegex);
@@ -334,6 +346,12 @@ public class RegistrationService
         if (!Utils.isNullOrEmpty(learnerId)){
         	request.getParameters().add("learnerid", learnerId);
         }
+        
+        if (after != null)
+        	request.getParameters().add("after", Utils.getIsoDateString(after));
+        if (until != null)
+        	request.getParameters().add("until", Utils.getIsoDateString(until));
+
         Document response = request.callService("rustici.registration.getRegistrationList");
 
         // Return the subset of the xml starting with the top <summary>

@@ -168,7 +168,6 @@ public class UploadService
     /// <summary>
     /// Delete the specified files given filenames only (not full path)
     /// </summary>
-    /// <returns>List of Course Data objects</returns>
     public void DeleteFileList(List<String> fileNames, String permissionDomain) throws Exception
     {
         ServiceRequest request = new ServiceRequest(configuration);
@@ -187,7 +186,6 @@ public class UploadService
     /// Delete the specified files given filenames only (not full path)
     /// from the default domain
     /// </summary>
-    /// <returns>List of Course Data objects</returns>
     public void DeleteFileList(List<String> fileNames) throws Exception
     {
         DeleteFileList(fileNames, null);
@@ -196,7 +194,6 @@ public class UploadService
     /// <summary>
     /// Delete the specified file from the permission domain
     /// </summary>
-    /// <returns>List of Course Data objects</returns>
     public void DeleteFile(String fileName, String permissionDomain) throws Exception
     {
         List<String> fileNames = new ArrayList<String>();
@@ -207,7 +204,6 @@ public class UploadService
     /// <summary>
     /// Delete the specified file from the default domain
     /// </summary>
-    /// <returns>List of Course Data objects</returns>
     public void DeleteFile(String filePath) throws Exception
     {
         String domain = null;

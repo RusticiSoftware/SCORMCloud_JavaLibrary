@@ -260,8 +260,8 @@ public class RegistrationData {
 		data.setLearnerLastName(XmlUtils.getChildElemText(elem, "learnerLastName"));
 		data.setEmail(XmlUtils.getChildElemText(elem, "email"));
 		data.setCreateDate(XmlUtils.parseXmlDate(XmlUtils.getChildElemText(elem, "createDate")));
-		data.setFirstAccessDate(XmlUtils.parseXmlDate(XmlUtils.getChildElemText(elem, "getFirstAccessDate")));
-		data.setLastAccessDate(XmlUtils.parseXmlDate(XmlUtils.getChildElemText(elem, "getLastAccessDate")));
+		data.setFirstAccessDate(XmlUtils.parseXmlDate(XmlUtils.getChildElemText(elem, "firstAccessDate")));
+		data.setLastAccessDate(XmlUtils.parseXmlDate(XmlUtils.getChildElemText(elem, "lastAccessDate")));
 		data.setCompletedDate(XmlUtils.parseXmlDate(XmlUtils.getChildElemText(elem, "completedDate")));
 		data.setTinCanRegistrationId(XmlUtils.getChildElemText(elem, "tinCanRegistrationId"));
 		

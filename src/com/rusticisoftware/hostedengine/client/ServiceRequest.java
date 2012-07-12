@@ -422,11 +422,13 @@ public class ServiceRequest {
 		intro.append("\r\n");
 		
 		intro.append("Content-Type: ");
-		String type = connection.guessContentTypeFromName(fileName);
+		String type = URLConnection.guessContentTypeFromName(fileName);
 		if (type == null) type = "application/octet-stream";
 		intro.append(type);
 		intro.append("\r\n");
 		intro.append("\r\n");
+		
+		String introStr = intro.toString();
 		
 		//Then the file data will go here
 		
@@ -437,16 +439,18 @@ public class ServiceRequest {
 		outro.append("--");
 		outro.append("\r\n");
 		
+		String outroStr = outro.toString();
+		
 		connection.setDoOutput(true);
 		connection.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
 		
-		int requestLength = intro.length() + (int)(file.length()) + outro.length();
+		int requestLength = introStr.getBytes("utf8").length + (int)(file.length()) + outroStr.getBytes("utf8").length;
 		((HttpURLConnection)connection).setFixedLengthStreamingMode(requestLength);
 		
 		OutputStream out = connection.getOutputStream();
-		out.write(intro.toString().getBytes());
+		out.write(intro.toString().getBytes("utf8"));
 		Utils.bufferedCopyStream(new FileInputStream(file), out);
-		out.write(outro.toString().getBytes());
+		out.write(outro.toString().getBytes("utf8"));
 		out.close();
 		
 		return connection.getInputStream();

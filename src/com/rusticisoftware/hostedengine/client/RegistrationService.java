@@ -557,6 +557,24 @@ public class RegistrationService
     	}
     	request.callService("rustici.registration.updateLearnerInfo");
     }
+
+    public void TestRegistrationPostUrl(String resultsPostbackUrl) throws Exception
+    {
+	TestRegistrationPostUrl(resultsPostbackUrl, null, null, null, null);
+    }
+
+    public void TestRegistrationPostUrl(String resultsPostbackUrl, 
+					RegistrationResultsAuthType authType, String postBackLoginName, 
+					String postBackLoginPassword) throws Exception 
+    {
+	TestRegistrationPostUrl(resultsPostbackUrl, authType, postBackLoginPassword, postBackLoginPassword, null);
+    }
+
+    public void TestRegistrationPostUrl(String resultsPostbackUrl, RegistrationResultsFormat resultsFormat) throws Exception
+    {
+	TestRegistrationPostUrl(resultsPostbackUrl, null, null, null, resultsFormat);
+    }
+
     
     public void TestRegistrationPostUrl(String resultsPostbackUrl, 
             RegistrationResultsAuthType authType, String postBackLoginName, String postBackLoginPassword,
@@ -564,18 +582,18 @@ public class RegistrationService
         {
             ServiceRequest request = new ServiceRequest(configuration);
 
-            // Required on this signature but not by the actual service
-            request.getParameters().add("authtype", authType.toString().toLowerCase());
-            request.getParameters().add("resultsformat", resultsFormat.toString().toLowerCase());
+            // Required on this signature and by the service
+	    request.getParameters().add("postbackurl", resultsPostbackUrl);
 
             // Optional:
-            if (!Utils.isNullOrEmpty(resultsPostbackUrl))
-                request.getParameters().add("postbackurl", resultsPostbackUrl);
+            if (authType!=null)
+		request.getParameters().add("authtype", authType.toString().toLowerCase());
             if (!Utils.isNullOrEmpty(postBackLoginName))
                 request.getParameters().add("urlname", postBackLoginName);
             if (!Utils.isNullOrEmpty(postBackLoginPassword))
                 request.getParameters().add("urlpass", postBackLoginPassword);
-
+            if (resultsFormat!=null)
+		request.getParameters().add("resultsformat", resultsFormat.toString().toLowerCase());
             request.callService("rustici.registration.testRegistrationPostUrl");
         }
 

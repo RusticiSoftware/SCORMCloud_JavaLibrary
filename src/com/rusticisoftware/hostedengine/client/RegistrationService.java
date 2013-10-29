@@ -303,6 +303,48 @@ public class RegistrationService
     }
 
     /// <summary>
+    /// Returns the current state of the listed registrations, including completion
+    /// and satisfaction type data.  Amount of detail depends on format parameter.
+    /// </summary>
+    /// <param name="courseId"> Limit search to only registrations for the course specified by this courseid</param>
+    /// <param name="learnerId"> Limit search to only registrations for the learner specified by this learnerid</param>
+    /// <param name="filter"> A regular expression that will be used to filter the list of registrations by registrationID.</param>
+    /// <param name="courseFilter"> A regular express that will be used to filter the list of registrations by courseID. </param>
+    /// <param name="resultsFormat"> One of three values, course, activity, or full.</param>
+    /// <param name="after"> Return registrations updated (strictly) after this timestamp.</param>
+    /// <param name="until"> Return registrations updated up to and including this timestamp.</param>
+    /// <returns>Registration data in XML Format</returns>
+    public List<RegistrationData> GetRegistrationListResults(String courseId, String learnerId, String filter, String courseFilter, 
+					    RegistrationResultsFormat resultsFormat, Date after, Date until) throws Exception
+    {
+        ServiceRequest request = new ServiceRequest(configuration);
+	if (!Utils.isNullOrEmpty(courseId)){
+        	request.getParameters().add("courseid", courseId);
+	}
+	if (!Utils.isNullOrEmpty(learnerId)){
+        	request.getParameters().add("learnerid", learnerId);
+	}
+	if (!Utils.isNullOrEmpty(filter)){
+        	request.getParameters().add("filter", filter);
+	}
+	if (!Utils.isNullOrEmpty(courseFilter)){
+        	request.getParameters().add("coursefilter", courseFilter);
+	}
+	if (resultsFormat != null){
+	    request.getParameters().add("resultsformat", resultsFormat.toString().toLowerCase());
+	}
+	if (after != null){
+        	request.getParameters().add("after", after);
+	}
+	if (until != null){
+        	request.getParameters().add("until", until);
+	}
+	Document response = request.callService("rustici.registration.getRegistrationListResults");
+	// Return the subset of the xml starting with the top <summary>
+	return RegistrationData.parseListFromXml(response);
+    }
+
+    /// <summary>
     /// Returns a list of registration id's along with their associated course
     /// </summary>
     /// <param name="regIdFilterRegex">Optional registration id filter</param>

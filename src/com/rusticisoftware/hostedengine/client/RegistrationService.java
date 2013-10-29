@@ -238,68 +238,47 @@ public class RegistrationService
 //        return Integer.parse(((Element)successNodes.item(0)).getAttribute("instanceid"));
 //    }
 
+
     /// <summary>
-    /// Return a registration summary object for the given registration
+    /// Returns the current state of the listed registrations, including completion
+    /// and satisfaction type data.  Amount of detail depends on format parameter.
     /// </summary>
-    /// <param name="registrationId">The unique identifier of the registration</param>
-    /// <returns></returns>
-    public RegistrationSummary GetRegistrationSummary(String registrationId) throws Exception
+    /// <param name="courseId"> Limit search to only registrations for the course specified by this courseid</param>
+    /// <param name="learnerId"> Limit search to only registrations for the learner specified by this learnerid</param>
+    /// <param name="filter"> A regular expression that will be used to filter the list of registrations by registrationID.</param>
+    /// <param name="courseFilter"> A regular express that will be used to filter the list of registrations by courseID. </param>
+    /// <param name="resultsFormat"> One of three values, course, activity, or full.</param>
+    /// <param name="after"> Return registrations updated (strictly) after this timestamp.</param>
+    /// <param name="until"> Return registrations updated up to and including this timestamp.</param>
+    /// <returns>Registration data in XML Format</returns>
+    public List<RegistrationData> GetRegistrationListResults(String courseId, String learnerId, String filter, String courseFilter, 
+					    RegistrationResultsFormat resultsFormat, Date after, Date until) throws Exception
     {
         ServiceRequest request = new ServiceRequest(configuration);
-        request.getParameters().add("regid", registrationId);
-        request.getParameters().add("resultsformat", "course");
-        request.getParameters().add("format", "xml");
-        Document response = request.callService("rustici.registration.getRegistrationResult");
-        Element reportElem = (Element)response.getElementsByTagName("registrationreport").item(0);
-        return new RegistrationSummary(reportElem);
-    }
-
-    /// <summary>
-    /// Returns the current state of the registration, including completion
-    /// and satisfaction type data.  Amount of detail depends on format parameter.
-    /// </summary>
-    /// <param name="registrationId">Unique Identifier for the registration</param>
-    /// <returns>Registration data in XML Format</returns>
-    public String GetRegistrationResult(String registrationId) throws Exception
-    {
-        return GetRegistrationResult(registrationId, RegistrationResultsFormat.COURSE_SUMMARY, DataFormat.XML);
-    }
-    
-    /// <summary>
-    /// Returns the current state of the registration, including completion
-    /// and satisfaction type data.  Amount of detail depends on format parameter.
-    /// </summary>
-    /// <param name="registrationId">Unique Identifier for the registration</param>
-    /// <param name="resultsFormat">Degree of detail to return</param>
-    /// <returns>Registration data in XML Format</returns>
-    public String GetRegistrationResult(String registrationId, RegistrationResultsFormat resultsFormat) throws Exception
-    {
-        return GetRegistrationResult(registrationId, resultsFormat, DataFormat.XML);
-    }
-
-    /// <summary>
-    /// Returns the current state of the registration, including completion
-    /// and satisfaction type data.  Amount of detail depends on format parameter.
-    /// </summary>
-    /// <param name="registrationId">Unique Identifier for the registration</param>
-    /// <param name="resultsFormat">Degree of detail to return</param>
-    /// <returns>Registration data in XML Format</returns>
-    public String GetRegistrationResult(String registrationId, RegistrationResultsFormat resultsFormat, DataFormat dataFormat) throws Exception
-    {
-        ServiceRequest request = new ServiceRequest(configuration);
-        request.getParameters().add("regid", registrationId);
-        request.getParameters().add("resultsformat", resultsFormat.toString().toLowerCase());
-        if (dataFormat == DataFormat.JSON)
-            request.getParameters().add("format", "json");
-
-        if(dataFormat == DataFormat.XML){
-        	Document response = request.callService("rustici.registration.getRegistrationResult");
-            // Return the subset of the xml starting with the top <summary>
-            Node reportElem = response.getElementsByTagName("registrationreport").item(0);
-            return XmlUtils.getXmlString(reportElem);
-        } else {
-            return request.getStringFromService("rustici.registration.getRegistrationResult");
-        }
+	if (!Utils.isNullOrEmpty(courseId)){
+        	request.getParameters().add("courseid", courseId);
+	}
+	if (!Utils.isNullOrEmpty(learnerId)){
+        	request.getParameters().add("learnerid", learnerId);
+	}
+	if (!Utils.isNullOrEmpty(filter)){
+        	request.getParameters().add("filter", filter);
+	}
+	if (!Utils.isNullOrEmpty(courseFilter)){
+        	request.getParameters().add("coursefilter", courseFilter);
+	}
+	if (resultsFormat != null){
+	    request.getParameters().add("resultsformat", resultsFormat.toString().toLowerCase());
+	}
+	if (after != null){
+        	request.getParameters().add("after", after);
+	}
+	if (until != null){
+        	request.getParameters().add("until", until);
+	}
+	Document response = request.callService("rustici.registration.getRegistrationListResults");
+	// Return the subset of the xml starting with the top <summary>
+	return RegistrationData.parseListFromXml(response);
     }
 
     /// <summary>

@@ -238,6 +238,69 @@ public class RegistrationService
 //        return Integer.parse(((Element)successNodes.item(0)).getAttribute("instanceid"));
 //    }
 
+    /// <summary>
+    /// Return a registration summary object for the given registration
+    /// </summary>
+    /// <param name="registrationId">The unique identifier of the registration</param>
+    /// <returns></returns>
+    public RegistrationSummary GetRegistrationSummary(String registrationId) throws Exception
+    {
+        ServiceRequest request = new ServiceRequest(configuration);
+        request.getParameters().add("regid", registrationId);
+        request.getParameters().add("resultsformat", "course");
+        request.getParameters().add("format", "xml");
+        Document response = request.callService("rustici.registration.getRegistrationResult");
+        Element reportElem = (Element)response.getElementsByTagName("registrationreport").item(0);
+        return new RegistrationSummary(reportElem);
+    }
+
+    /// <summary>
+    /// Returns the current state of the registration, including completion
+    /// and satisfaction type data.  Amount of detail depends on format parameter.
+    /// </summary>
+    /// <param name="registrationId">Unique Identifier for the registration</param>
+    /// <returns>Registration data in XML Format</returns>
+    public String GetRegistrationResult(String registrationId) throws Exception
+    {
+        return GetRegistrationResult(registrationId, RegistrationResultsFormat.COURSE_SUMMARY, DataFormat.XML);
+    }
+    
+    /// <summary>
+    /// Returns the current state of the registration, including completion
+    /// and satisfaction type data.  Amount of detail depends on format parameter.
+    /// </summary>
+    /// <param name="registrationId">Unique Identifier for the registration</param>
+    /// <param name="resultsFormat">Degree of detail to return</param>
+    /// <returns>Registration data in XML Format</returns>
+    public String GetRegistrationResult(String registrationId, RegistrationResultsFormat resultsFormat) throws Exception
+    {
+        return GetRegistrationResult(registrationId, resultsFormat, DataFormat.XML);
+    }
+
+    /// <summary>
+    /// Returns the current state of the registration, including completion
+    /// and satisfaction type data.  Amount of detail depends on format parameter.
+    /// </summary>
+    /// <param name="registrationId">Unique Identifier for the registration</param>
+    /// <param name="resultsFormat">Degree of detail to return</param>
+    /// <returns>Registration data in XML Format</returns>
+    public String GetRegistrationResult(String registrationId, RegistrationResultsFormat resultsFormat, DataFormat dataFormat) throws Exception
+    {
+        ServiceRequest request = new ServiceRequest(configuration);
+        request.getParameters().add("regid", registrationId);
+        request.getParameters().add("resultsformat", resultsFormat.toString().toLowerCase());
+        if (dataFormat == DataFormat.JSON)
+            request.getParameters().add("format", "json");
+
+        if(dataFormat == DataFormat.XML){
+        	Document response = request.callService("rustici.registration.getRegistrationResult");
+            // Return the subset of the xml starting with the top <summary>
+            Node reportElem = response.getElementsByTagName("registrationreport").item(0);
+            return XmlUtils.getXmlString(reportElem);
+        } else {
+            return request.getStringFromService("rustici.registration.getRegistrationResult");
+        }
+    }
 
     /// <summary>
     /// Returns the current state of the listed registrations, including completion

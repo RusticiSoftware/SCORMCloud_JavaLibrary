@@ -57,11 +57,7 @@ public class StatementForwardService {
 		request.getParameters().add("destinationURL", dURL);
 		request.getParameters().add("destinationUsername", dUsername);
 		request.getParameters().add("destinationPassword", dPassword);
-		
-	    Document response = request.callService("rustici.statementForward.AddForwardingPath");
-	    NodeList importResultNodes = response.getElementsByTagName("addforwardingpathresult");
-	    Element resultElement = (Element)importResultNodes.item(0);
-        return resultElement.getTextContent();
+		return request.getStringFromService("rustici.statementForward.AddForwardingPath");
 	}
 
 	public void UpdatePath(String id, String sURL, String sUsername, String sPassword, String dURL, 

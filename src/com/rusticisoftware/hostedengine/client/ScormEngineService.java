@@ -41,6 +41,7 @@ public class ScormEngineService
     private DispatchService dispatchService = null;
     private DebugService debugService = null;
     private InvitationService invitationService = null;
+    private StatementForwardService stmtFrwdService = null;
 
     /// <summary>
     /// SCORM Engine Service constructor that that takes the three required properties.
@@ -71,6 +72,7 @@ public class ScormEngineService
         taggingService = new TaggingService(configuration, this);
         dispatchService = new DispatchService(configuration, this);
         debugService = new DebugService(configuration, this);
+        stmtFrwdService = new StatementForwardService(configuration, this);
     }
 
     /// <summary>
@@ -145,6 +147,13 @@ public class ScormEngineService
 		return dispatchService;
 	}
     
+    /// <summary>
+    /// Contains methods for accessing Tin Can statement forwarding
+    /// </summary>
+    public StatementForwardService getStatementForwardService() {
+        return stmtFrwdService;
+    }
+
     /// <summary>
     /// Contains SCORM Cloud debug methods.
     /// </summary>

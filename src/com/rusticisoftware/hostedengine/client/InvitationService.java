@@ -54,7 +54,7 @@ public class InvitationService
 	public String createInvitation(String courseId, boolean publicInvitation, boolean send, 
 			String addresses, String emailSubject, String emailBody, String creatingUserEmail, Integer registrationCap,
 			String postbackUrl, String authType, String urlName, String urlPass, String resultsFormat, 
-			boolean async, Map<String, String> extendedParameters) throws Exception  {
+			boolean async, Map<String, String> extendedParameters, List<String> tagList) throws Exception  {
 		
         ServiceRequest request = new ServiceRequest(configuration);
         request.setUsePost(true);
@@ -94,6 +94,9 @@ public class InvitationService
         }
         if (resultsFormat != null) {
             request.getParameters().add("resultsformat", resultsFormat);
+        }
+        if(tagList != null && tagList.size() > 0){
+            request.getParameters().add("tags", Utils.join(tagList, ","));
         }
         
         if (extendedParameters != null) {

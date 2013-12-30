@@ -50,6 +50,15 @@ public class InvitationService
     {
         this.configuration = configuration;
     }
+
+    public String createInvitation(String courseId, boolean publicInvitation, boolean send, 
+            String addresses, String emailSubject, String emailBody, String creatingUserEmail, Integer registrationCap,
+            String postbackUrl, String authType, String urlName, String urlPass, String resultsFormat, 
+            boolean async, Map<String, String> extendedParameters) throws Exception {
+        
+        return createInvitation(courseId, publicInvitation, send, addresses, emailSubject, emailBody, creatingUserEmail, 
+            registrationCap, postbackUrl, authType, urlName, urlPass, resultsFormat, async, extendedParameters, null);
+    }
     
 	public String createInvitation(String courseId, boolean publicInvitation, boolean send, 
 			String addresses, String emailSubject, String emailBody, String creatingUserEmail, Integer registrationCap,

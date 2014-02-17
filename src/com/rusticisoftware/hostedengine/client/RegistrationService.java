@@ -220,6 +220,20 @@ public class RegistrationService
         	request.getParameters().add("email", email);
         request.callService("rustici.registration.createRegistration");
     }
+
+    /// <summary>
+    /// Check to see if a registration exists
+    /// </summary>
+    /// <param name="registrationId">Unique Identifier for the registration</param>
+    /// <returns>A Boolean indicator of the registration existence </returns>
+    public boolean RegistrationExists(String registrationId) throws Exception
+    {
+        ServiceRequest request = new ServiceRequest(configuration);
+        request.getParameters().add("regid", registrationId);       
+	Document response = request.callService("rustici.registration.exists");
+	Element rspElem = (Element)response.getElementsByTagName("rsp").item(0);
+	return (Boolean)XmlUtils.getNamedElemValue(rspElem,"result",Boolean.class,false);
+    }
        
     /// <summary>
     /// Creates a new instance of an existing registration.  This essentially creates a

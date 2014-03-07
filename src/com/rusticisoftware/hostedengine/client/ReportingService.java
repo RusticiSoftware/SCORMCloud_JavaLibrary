@@ -74,7 +74,7 @@ public class ReportingService
     	//Relative path, auto add the right server name
     	String fullReportUrl = reportUrl;
         if(reportUrl.startsWith("/Reportage")){
-            fullReportUrl = "http://" + sr.getServer() + reportUrl;
+            fullReportUrl = sr.getProtocol() + "://" + sr.getServer() + reportUrl;
         }
     	sr.getParameters().add("auth", reportageAuth);
     	sr.getParameters().add("reporturl", fullReportUrl);

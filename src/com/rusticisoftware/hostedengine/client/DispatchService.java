@@ -159,7 +159,11 @@ public class DispatchService {
     	return Dispatch.parseDispatchList(doc);
     }
 
-	public void UpdateDispatches(String destinationId, String courseId, String dispatchId, List<String> tagList, Boolean enabled, List<String> tagsToAdd, List<String> tagsToRemove) throws Exception {
+    public void UpdateDispatches(String destinationId, String courseId, String dispatchId, List<String> tagList, Boolean enabled, List<String> tagsToAdd, List<String> tagsToRemove) throws Exception {
+        UpdateDispatches(destinationId, courseId, dispatchId, tagList, enabled, tagsToAdd, tagsToRemove, null);
+        }
+
+	public void UpdateDispatches(String destinationId, String courseId, String dispatchId, List<String> tagList, Boolean enabled, List<String> tagsToAdd, List<String> tagsToRemove, Boolean instanced) throws Exception {
 		ServiceRequest sr = new ServiceRequest(configuration);
 		if(destinationId != null){
 			sr.getParameters().add("destinationid", destinationId);
@@ -182,6 +186,9 @@ public class DispatchService {
     	if(tagsToRemove != null){
     		sr.getParameters().add("removetags", Utils.join(tagsToRemove, ","));
     	}
+        if(instanced != null){
+            sr.getParameters().add("instanced", instanced.toString().toLowerCase());
+        }
     	sr.callService("rustici.dispatch.updateDispatches");
 	}
 	

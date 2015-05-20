@@ -31,6 +31,7 @@ package com.rusticisoftware.hostedengine.client;
 public class ScormEngineService
 {
     private Configuration configuration = null;
+    private LrsAccountService lrsAccountService = null;
     private CourseService courseService = null;
     private RegistrationService registrationService = null;
     private UploadService uploadService = null;
@@ -62,6 +63,7 @@ public class ScormEngineService
     public ScormEngineService(Configuration config)
     {
         configuration = config;
+        lrsAccountService = new LrsAccountService(configuration, this);
         courseService = new CourseService(configuration, this);
         registrationService = new RegistrationService(configuration, this);
         invitationService = new InvitationService(configuration, this);
@@ -73,6 +75,14 @@ public class ScormEngineService
         dispatchService = new DispatchService(configuration, this);
         debugService = new DebugService(configuration, this);
         stmtFrwdService = new StatementForwardService(configuration, this);
+    }
+    
+    /// <summary>
+    /// Contains SCORM Engine LRS account functionality.
+    /// </summary>
+    public LrsAccountService getAccountService()
+    {
+        return lrsAccountService;
     }
 
     /// <summary>

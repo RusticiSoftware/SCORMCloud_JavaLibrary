@@ -34,7 +34,10 @@ import java.util.List;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+
+import com.rusticisoftware.hostedengine.client.datatypes.Enums.RegistrationResultsAuthType;
 import com.rusticisoftware.hostedengine.client.datatypes.LaunchInfo;
+import com.rusticisoftware.hostedengine.client.datatypes.PostbackInfo;
 import com.rusticisoftware.hostedengine.client.datatypes.RegistrationData;
 import com.rusticisoftware.hostedengine.client.datatypes.RegistrationSummary;
 import com.rusticisoftware.hostedengine.client.datatypes.Enums.*;
@@ -423,6 +426,20 @@ public class RegistrationService
     }
 
     /// <summary>
+    /// Check if a registration already exists
+    /// </summary>
+    /// <param name="registrationId">Unique Identifier for the registration</param>
+    /// <returns></returns>
+    public String exists(String registrationId) throws Exception
+    {
+        ServiceRequest request = new ServiceRequest(configuration);
+        request.getParameters().add("regid", registrationId);
+        Document response = request.callService("rustici.registration.exists");
+        Element elem = (Element) response.getElementsByTagName("result").item(0);
+        return elem.getTextContent();
+    }
+    
+    /// <summary>
     /// Delete the specified registration
     /// </summary>
     /// <param name="registrationId">Unique Identifier for the registration</param>
@@ -612,6 +629,85 @@ public class RegistrationService
     		request.getParameters().add("newid", newLearnerId);
     	}
     	request.callService("rustici.registration.updateLearnerInfo");
+    }
+
+    /// <summary>
+    /// Retrieve current postback info for a registration ID
+    /// </summary>
+    /// <param name="registrationId">Identifier of registration to be queried</param>
+    /// <returns>PostbackInfo XML fragment</returns>
+    public PostbackInfo GetPostbackInfo(String registrationId) throws Exception
+    {
+        ServiceRequest request = new ServiceRequest(configuration);
+        request.getParameters().add("regid", registrationId);
+        Document doc = request.callService("rustici.registration.getPostbackInfo");
+        Element postbackInfoElem;
+        try
+        {
+            postbackInfoElem = ((Element)doc.getElementsByTagName("postbackinfo").item(0));
+            postbackInfoElem.getChildNodes().getLength();   // Just test that we got a non-null fragment
+        }
+        catch (NullPointerException e)
+        {
+            throw new ServiceException("Received malformed response from GetPostbackInfo");
+        }
+
+        return new PostbackInfo(postbackInfoElem);
+    }
+    
+    /// <summary>
+    /// update the postback URL only for an existing registration
+    /// </summary>
+    /// <param name="registrationId">Identifier of registration to be updated</param>
+    /// <param name="postbackURL">New postback URL to be associated with this registration</param>
+    /// <returns></returns>
+    public void UpdatePostbackInfo(String registrationId, String postbackURL) throws Exception
+    {
+        UpdatePostbackInfo(registrationId, postbackURL, null, null, null, null);
+    }
+
+    /// <summary>
+    /// update the postback URL and student authentication information for an existing registration
+    /// </summary>
+    /// <param name="registrationId">Identifier of registration to be updated</param>
+    /// <param name="postbackURL">New postback URL to be associated with this registration</param>
+    /// <param name="name">Login name for student</param>
+    /// <param name="password">Password for student</param>
+    /// <param name="authType">Authentication type [FORM, HTTPBASIC] for login</param>
+    /// <returns></returns>
+    public void UpdatePostbackInfo(String registrationId, String postbackURL,
+            String name, String password, RegistrationResultsAuthType authType) throws Exception 
+    {
+        UpdatePostbackInfo(registrationId, postbackURL, name, password, authType, null);
+    }
+
+    /// <summary>
+    /// update the postback URL, student authentication information, and requested format for results for an existing registration
+    /// </summary>
+    /// <param name="registrationId">Identifier of registration to be updated</param>
+    /// <param name="postbackURL">New postback URL to be associated with this registration</param>
+    /// <param name="name">Login name for student</param>
+    /// <param name="password">Password for student</param>
+    /// <param name="authType">Authentication type [FORM, HTTPBASIC] for login</param>
+    /// <param name="resultsFormat">Rreuested format for reported results [COURSE_SUMMARY, ACTIVITY_SUMMARY, FULL_DETAIL]</param>
+    /// <returns></returns>
+    public void UpdatePostbackInfo(String registrationId, String postbackURL, String name, String password,
+            RegistrationResultsAuthType authType, RegistrationResultsFormat resultsFormat) throws Exception
+    {
+        ServiceRequest request = new ServiceRequest(configuration);
+        request.getParameters().add("regid", registrationId);
+        request.getParameters().add("url", postbackURL);
+        if (!Utils.isNullOrEmpty(name))
+            request.getParameters().add("name", name);
+        if (!Utils.isNullOrEmpty(password))
+            request.getParameters().add("password", password);
+        if (authType != null)
+            request.getParameters().add("authtype", authType.toString());
+        if (resultsFormat != null)
+            request.getParameters().add("resultsformat", resultsFormat.toString());
+        
+        request.setUsePost(true);
+        request.callService("rustici.registration.updatePostbackInfo");
     }
 
     public void TestRegistrationPostUrl(String resultsPostbackUrl) throws Exception

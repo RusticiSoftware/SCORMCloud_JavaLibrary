@@ -77,6 +77,24 @@ public class PostbackInfo {
         
     }
     
+    @Override
+    public boolean equals(Object right)
+    {
+        int e = 1;
+        if (right instanceof PostbackInfo)
+        {
+            PostbackInfo r = (PostbackInfo)right;
+            e = 0;
+            e += (this.getAuthType() == r.getAuthType()) ? 0 : 1;
+            e += (this.getLogin().equals(r.getLogin())) ? 0 : 1;
+            e += (this.getPassword().equals(r.getLogin())) ? 0 : 1;
+            e += (this.getRegID().equals(r.getRegID())) ? 0 : 1;
+            e += (this.getResultsFormat() == r.getResultsFormat()) ? 0 : 1;
+            e += (this.getUrl().equals(r.getUrl())) ? 0 : 1;
+        }
+        return (e == 0);
+    }
+    
     public String getUrl() {
         return url;
     }

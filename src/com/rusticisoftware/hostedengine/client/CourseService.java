@@ -743,7 +743,7 @@ public class CourseService
         // params as well the actual method params.
         ServiceRequest.ParameterMap parameterMap = new ServiceRequest.ParameterMap();
         parameterMap.add("action", "properties.view");
-        parameterMap.add("package", "AppId|" + configuration.getAppId() + "!PackageId|" + courseId);
+        parameterMap.add("package", "ApiCourseId|" + courseId);
         parameterMap.add("appid", configuration.getAppId());
         parameterMap.add("editor", editorVersionStr);
         parameterMap.add("ts", Utils.getFormattedTime(new Date()));

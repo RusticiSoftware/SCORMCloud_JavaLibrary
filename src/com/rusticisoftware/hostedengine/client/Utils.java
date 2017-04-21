@@ -73,12 +73,10 @@ public class Utils {
     public static boolean bufferedCopyStream(InputStream inStream, OutputStream outStream) throws Exception {
         BufferedInputStream bis = new BufferedInputStream( inStream );
         BufferedOutputStream bos = new BufferedOutputStream ( outStream );
-        while(true){
-            int data = bis.read();
-            if (data == -1){
-                break;
-            }
-            bos.write(data);
+        byte[] buffer = new byte[4096];
+        int bytesRead = -1;
+        while ((bytesRead = bis.read(buffer)) != -1) {
+            bos.write(buffer, 0, bytesRead);
         }
         bos.flush();
         return true;

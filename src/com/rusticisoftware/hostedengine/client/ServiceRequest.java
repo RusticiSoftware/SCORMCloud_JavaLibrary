@@ -233,17 +233,18 @@ public class ServiceRequest {
         while(retries > 0){
         	InputStream responseStream = null;
         	try {
-	        	
-		        URLConnection connection = url.openConnection();
+
+				HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 		        connection.setConnectTimeout(5000);
 		        connection.setReadTimeout(30000);
 		        connection.setDoOutput(true);
 		        connection.setDoInput(true);
 		        connection.setUseCaches(false);
+				connection.setRequestProperty("Connection", "Keep-Alive");
 
 		        if(getFileToPost() == null){
 		        	if (postData != null) {
-						((HttpURLConnection) connection).setRequestMethod("POST");
+						connection.setRequestMethod("POST");
 						connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
 						connection.setRequestProperty("Content-Length", "" + Integer.toString(postData.getBytes().length));
 						DataOutputStream wr = new DataOutputStream (connection.getOutputStream ());
@@ -406,51 +407,51 @@ public class ServiceRequest {
 		}
 	}
 	
-	public InputStream postFile(URLConnection connection, String name, File file) throws Exception 
+	public InputStream postFile(HttpURLConnection connection, String name, File file) throws Exception
 	{
-		String fileName = file.getName();
+		final String fileName = file.getName();
 		Random random = new Random();
-		String randomString = Long.toString(random.nextLong(), 36);
-		String boundary = "---------------------------" + randomString + randomString + randomString;
-		 
-		StringBuilder intro = new StringBuilder();	  	  
-		intro.append("--");
+		final String randomString = Long.toString(random.nextLong(), 36);
+		final String boundary = randomString + randomString + randomString;
+		final String hyphens = "--";
+		final String newline = "\r\n";
+
+		StringBuilder intro = new StringBuilder();
+		intro.append(hyphens);
 		intro.append(boundary);
-		intro.append("\r\n");
-		
-		intro.append("Content-Disposition: form-data; name=\"" + name + "\"; filename=\"" + fileName + "\"");
-		intro.append("\r\n");
-		
-		intro.append("Content-Type: ");
+		intro.append(newline);
+
+		intro.append(String.format("Content-Disposition: form-data; name=\"%s\"; filename=\"%s\"", name, fileName));
+		intro.append(newline);
+
 		String type = URLConnection.guessContentTypeFromName(fileName);
-		if (type == null) type = "application/octet-stream";
-		intro.append(type);
-		intro.append("\r\n");
-		intro.append("\r\n");
-		
-		String introStr = intro.toString();
-		
+		if (type == null) {
+			type = "application/octet-stream";
+		}
+		intro.append(String.format("Content-Type: %s", type));
+		intro.append(newline);
+		intro.append(newline);
+
 		//Then the file data will go here
-		
+
 		StringBuilder outro = new StringBuilder();
-		outro.append("\r\n");
-		outro.append("--");
-		outro.append(boundary);
-		outro.append("--");
-		outro.append("\r\n");
-		
-		String outroStr = outro.toString();
-		
+		outro.append(newline);
+		outro.append(String.format("%s%s%s", hyphens, boundary, hyphens));
+		outro.append(newline);
+
+		final String introStr = intro.toString();
+		final String outroStr = outro.toString();
+		int requestLength = introStr.getBytes("utf8").length + (int)(file.length()) + outroStr.getBytes("utf8").length;
+
 		connection.setDoOutput(true);
 		connection.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
-		
-		int requestLength = introStr.getBytes("utf8").length + (int)(file.length()) + outroStr.getBytes("utf8").length;
-		((HttpURLConnection)connection).setFixedLengthStreamingMode(requestLength);
-		
-		OutputStream out = connection.getOutputStream();
-		out.write(intro.toString().getBytes("utf8"));
+		connection.setFixedLengthStreamingMode(requestLength);
+
+		DataOutputStream out = new DataOutputStream(connection.getOutputStream());
+		out.write(introStr.getBytes("utf8"));
 		Utils.bufferedCopyStream(new FileInputStream(file), out);
-		out.write(outro.toString().getBytes("utf8"));
+		out.write(outroStr.getBytes("utf8"));
+		out.flush();
 		out.close();
 		
 		return connection.getInputStream();

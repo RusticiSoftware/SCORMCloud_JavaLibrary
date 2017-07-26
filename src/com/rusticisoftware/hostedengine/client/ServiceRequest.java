@@ -441,7 +441,7 @@ public class ServiceRequest {
 
 		final String introStr = intro.toString();
 		final String outroStr = outro.toString();
-		int requestLength = introStr.getBytes("utf8").length + (int)(file.length()) + outroStr.getBytes("utf8").length;
+		long requestLength = introStr.getBytes("utf8").length + file.length() + outroStr.getBytes("utf8").length;
 
 		connection.setDoOutput(true);
 		connection.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);

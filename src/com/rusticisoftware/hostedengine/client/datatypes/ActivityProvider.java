@@ -28,17 +28,15 @@
 
 package com.rusticisoftware.hostedengine.client.datatypes;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import com.rusticisoftware.hostedengine.client.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
-import com.rusticisoftware.hostedengine.client.XmlUtils;
+import java.util.ArrayList;
+import java.util.List;
 
-public class ActivityProvider
-{
+public class ActivityProvider {
     private Boolean accountEnabled;
 
     private String accountAuthType;
@@ -46,111 +44,111 @@ public class ActivityProvider
     private String accountLabel;
     private String accountSecret;
     private String id;
-    
+
 
     public static ActivityProvider parseFromXmlElement(Element exportElem) throws Exception {
-      ActivityProvider provider = new ActivityProvider();
+        ActivityProvider provider = new ActivityProvider();
 
-      String enabledStr = XmlUtils.getChildElemText(exportElem, "accountEnabled");
-      provider.setAccountEnabled("true".equals(enabledStr));
+        String enabledStr = XmlUtils.getChildElemText(exportElem, "accountEnabled");
+        provider.setAccountEnabled("true".equals(enabledStr));
 
-      provider.setAccountAuthType(XmlUtils.getChildElemText(exportElem, "accountAuthType"));
-      provider.setAccountKey(XmlUtils.getChildElemText(exportElem, "accountKey"));
-      provider.setAccountLabel(XmlUtils.getChildElemText(exportElem, "accountLabel"));
-      provider.setAccountSecret(XmlUtils.getChildElemText(exportElem, "accountSecret"));
-      provider.setId(XmlUtils.getChildElemText(exportElem, "id"));
+        provider.setAccountAuthType(XmlUtils.getChildElemText(exportElem, "accountAuthType"));
+        provider.setAccountKey(XmlUtils.getChildElemText(exportElem, "accountKey"));
+        provider.setAccountLabel(XmlUtils.getChildElemText(exportElem, "accountLabel"));
+        provider.setAccountSecret(XmlUtils.getChildElemText(exportElem, "accountSecret"));
+        provider.setId(XmlUtils.getChildElemText(exportElem, "id"));
 
-      return provider;
+        return provider;
     }
 
-    public static List<ActivityProvider> parseListFromXml (Document courseListXmlDoc) throws Exception {
-      Element activityProviderListElem = (Element)courseListXmlDoc.getElementsByTagName("activityProviderList").item(0);
+    public static List<ActivityProvider> parseListFromXml(Document courseListXmlDoc) throws Exception {
+        Element activityProviderListElem = (Element) courseListXmlDoc.getElementsByTagName("activityProviderList").item(0);
 
-      List<ActivityProvider> providerList = new ArrayList<ActivityProvider>();
+        List<ActivityProvider> providerList = new ArrayList<ActivityProvider>();
 
-      NodeList providerElems = activityProviderListElem.getChildNodes();
-      for(int i = 0; i < providerElems.getLength(); i++){
-        if(providerElems.item(i) instanceof Element) {
-        } else {
-          continue;
+        NodeList providerElems = activityProviderListElem.getChildNodes();
+        for (int i = 0; i < providerElems.getLength(); i++) {
+            if (providerElems.item(i) instanceof Element) {
+                Element courseElem = (Element) providerElems.item(i);
+                providerList.add(parseFromXmlElement(courseElem));
+            } else {
+                continue;
+            }
         }
-        Element courseElem = (Element)providerElems.item(i);
-        providerList.add( parseFromXmlElement(courseElem) );
-      }
 
-      return providerList;
+        return providerList;
     }
 
-    public static String getXmlString (List<ActivityProvider> actiivtyProviderList){
-      StringBuilder xml = new StringBuilder();
-      xml.append("<activityProviderList>\n");
-      for(ActivityProvider data : actiivtyProviderList){
-        xml.append(data.getXmlString());
-      }
-      xml.append("</activityProviderList>");
-      return xml.toString();
+    public static String getXmlString(List<ActivityProvider> actiivtyProviderList) {
+        StringBuilder xml = new StringBuilder();
+        xml.append("<activityProviderList>\n");
+        for (ActivityProvider data : actiivtyProviderList) {
+            xml.append(data.getXmlString());
+        }
+        xml.append("</activityProviderList>");
+        return xml.toString();
     }
 
     public String getXmlString() {
-      StringBuilder xml = new StringBuilder();
-      xml.append("  <activityProvider>\n");
-      xml.append("    <id><![CDATA[" + getId() + "]]></id>\n");
-      xml.append("    <accountLabel><![CDATA[" + getAccountLabel() + "]]></accountLabel>\n");
-      xml.append("    <accountKey><![CDATA[" + getAccountKey() + "]]></accountKey>\n");
-      xml.append("    <accountSecret><![CDATA[" + getAccountSecret() + "]]></accountSecret>\n");
-      xml.append("    <accountAuthType><![CDATA[" + getAccountAuthType() + "]]></accountAuthType>\n");
-      xml.append("    <accountEnabled>" + getAccountEnabled() + "</accountEnabled>\n");
-      xml.append("  </activityProvider>\n");
+        StringBuilder xml = new StringBuilder();
+        xml.append("  <activityProvider>\n");
+        xml.append("    <id><![CDATA[" + getId() + "]]></id>\n");
+        xml.append("    <accountLabel><![CDATA[" + getAccountLabel() + "]]></accountLabel>\n");
+        xml.append("    <accountKey><![CDATA[" + getAccountKey() + "]]></accountKey>\n");
+        xml.append("    <accountSecret><![CDATA[" + getAccountSecret() + "]]></accountSecret>\n");
+        xml.append("    <accountAuthType><![CDATA[" + getAccountAuthType() + "]]></accountAuthType>\n");
+        xml.append("    <accountEnabled>" + getAccountEnabled() + "</accountEnabled>\n");
+        xml.append("  </activityProvider>\n");
 
-      return xml.toString();
+        return xml.toString();
     }
 
     public Boolean getAccountEnabled() {
-      return accountEnabled;
+        return accountEnabled;
     }
 
     public void setAccountEnabled(Boolean accountEnabled) {
-      this.accountEnabled = accountEnabled;
+        this.accountEnabled = accountEnabled;
     }
 
     public String getAccountAuthType() {
-      return accountAuthType;
+        return accountAuthType;
     }
 
     public void setAccountAuthType(String accountAuthType) {
-      this.accountAuthType = accountAuthType;
+        this.accountAuthType = accountAuthType;
     }
 
     public String getAccountKey() {
-      return accountKey;
+        return accountKey;
     }
 
     public void setAccountKey(String accountKey) {
-      this.accountKey = accountKey;
+        this.accountKey = accountKey;
     }
 
     public String getAccountLabel() {
-      return accountLabel;
+        return accountLabel;
     }
 
     public void setAccountLabel(String accountLabel) {
-      this.accountLabel = accountLabel;
+        this.accountLabel = accountLabel;
     }
 
     public String getAccountSecret() {
-      return accountSecret;
+        return accountSecret;
     }
 
     public void setAccountSecret(String accountSecret) {
-      this.accountSecret = accountSecret;
+        this.accountSecret = accountSecret;
     }
 
     public String getId() {
-      return id;
+        return id;
     }
 
     public void setId(String id) {
-      this.id = id;
+        this.id = id;
     }
 
 }

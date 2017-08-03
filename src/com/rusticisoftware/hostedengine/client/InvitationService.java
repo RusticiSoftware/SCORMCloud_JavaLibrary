@@ -28,53 +28,50 @@
 
 package com.rusticisoftware.hostedengine.client;
 
+import com.rusticisoftware.hostedengine.client.datatypes.InvitationInfo;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
-import com.rusticisoftware.hostedengine.client.datatypes.InvitationInfo;
-
-
-public class InvitationService
-{
+public class InvitationService {
     private Configuration configuration = null;
-    
+
     /// <summary>
     /// Main constructor that provides necessary configuration information
     /// </summary>
     /// <param name="configuration">Application Configuration Data</param>
-    public InvitationService(Configuration configuration, ScormEngineService manager)
-    {
+    public InvitationService(Configuration configuration, ScormEngineService manager) {
         this.configuration = configuration;
     }
 
-    public String createInvitation(String courseId, boolean publicInvitation, boolean send, 
-            String addresses, String emailSubject, String emailBody, String creatingUserEmail, Integer registrationCap,
-            String postbackUrl, String authType, String urlName, String urlPass, String resultsFormat, 
-            boolean async, Map<String, String> extendedParameters) throws Exception {
-        
-        return createInvitation(courseId, publicInvitation, send, addresses, emailSubject, emailBody, creatingUserEmail, 
+    public String createInvitation(String courseId, boolean publicInvitation, boolean send,
+                                   String addresses, String emailSubject, String emailBody, String creatingUserEmail, Integer registrationCap,
+                                   String postbackUrl, String authType, String urlName, String urlPass, String resultsFormat,
+                                   boolean async, Map<String, String> extendedParameters) throws Exception {
+
+        return createInvitation(courseId, publicInvitation, send, addresses, emailSubject, emailBody, creatingUserEmail,
             registrationCap, postbackUrl, authType, urlName, urlPass, resultsFormat, async, extendedParameters, null);
     }
-    
-	public String createInvitation(String courseId, boolean publicInvitation, boolean send, 
-			String addresses, String emailSubject, String emailBody, String creatingUserEmail, Integer registrationCap,
-			String postbackUrl, String authType, String urlName, String urlPass, String resultsFormat, 
-			boolean async, Map<String, String> extendedParameters, List<String> tagList) throws Exception  {
-		
+
+    public String createInvitation(String courseId, boolean publicInvitation, boolean send,
+                                   String addresses, String emailSubject, String emailBody, String creatingUserEmail, Integer registrationCap,
+                                   String postbackUrl, String authType, String urlName, String urlPass, String resultsFormat,
+                                   boolean async, Map<String, String> extendedParameters, List<String> tagList) throws Exception {
+
         ServiceRequest request = new ServiceRequest(configuration);
         request.setUsePost(true);
-        
+
         request.getParameters().add("courseid", courseId);
         request.getParameters().add("public", publicInvitation);
-        
+
         request.getParameters().add("send", send);
-        
+
         if (registrationCap != null && registrationCap > 0) {
-        	request.getParameters().add("registrationCap", registrationCap);
+            request.getParameters().add("registrationCap", registrationCap);
         }
         if (addresses != null) {
             request.getParameters().add("addresses", addresses);
@@ -88,7 +85,7 @@ public class InvitationService
         if (creatingUserEmail != null) {
             request.getParameters().add("creatingUserEmail", creatingUserEmail);
         }
-        
+
         if (postbackUrl != null) {
             request.getParameters().add("postbackurl", postbackUrl);
         }
@@ -104,68 +101,66 @@ public class InvitationService
         if (resultsFormat != null) {
             request.getParameters().add("resultsformat", resultsFormat);
         }
-        if(tagList != null && tagList.size() > 0){
+        if (tagList != null && tagList.size() > 0) {
             request.getParameters().add("tags", Utils.join(tagList, ","));
         }
-        
+
         if (extendedParameters != null) {
-        	for (Entry<String, String> entry : extendedParameters.entrySet()) {
-        		request.getParameters().add(entry.getKey(), entry.getValue());
-        	}
+            for (Entry<String, String> entry : extendedParameters.entrySet()) {
+                request.getParameters().add(entry.getKey(), entry.getValue());
+            }
         }
-        
-        if (async){
-        	return Utils.getNonXmlPayloadFromResponse(request.callService("rustici.invitation.createInvitationAsync"));
+
+        if (async) {
+            return Utils.getNonXmlPayloadFromResponse(request.callService("rustici.invitation.createInvitationAsync"));
         } else {
-        	return Utils.getNonXmlPayloadFromResponse(request.callService("rustici.invitation.createInvitation"));
+            return Utils.getNonXmlPayloadFromResponse(request.callService("rustici.invitation.createInvitation"));
         }
-        
-        
-	}
-	
-	public String getInvitationStatus(String invitationId)throws Exception {
-		ServiceRequest request = new ServiceRequest(configuration);
+
+
+    }
+
+    public String getInvitationStatus(String invitationId) throws Exception {
+        ServiceRequest request = new ServiceRequest(configuration);
         request.getParameters().add("invitationId", invitationId);
-        
+
         Document response = request.callService("rustici.invitation.getInvitationStatus");
-        return ((Element)response.getElementsByTagName("status").item(0)).getTextContent();
-		
-		
-	}
-	
-	public InvitationInfo getInvitationInfo(String invitationId, boolean includeRegistrationSummary) throws Exception {
+        return response.getElementsByTagName("status").item(0).getTextContent();
+
+
+    }
+
+    public InvitationInfo getInvitationInfo(String invitationId, boolean includeRegistrationSummary) throws Exception {
         ServiceRequest request = new ServiceRequest(configuration);
         request.getParameters().add("invitationId", invitationId);
         request.getParameters().add("detail", includeRegistrationSummary);
 
         Document response = request.callService("rustici.invitation.getInvitationInfo");
-        return InvitationInfo.parseInvitationInfoElement((Element)response.getElementsByTagName("invitationInfo").item(0));
-	}
-	
-	
-	public List<InvitationInfo> getInvitationList(String invFilter, String coursefilter) throws Exception
-    {
-		ServiceRequest request = new ServiceRequest(configuration);
-		if (invFilter != null) {
-			request.getParameters().add("filter", invFilter);
+        return InvitationInfo.parseInvitationInfoElement((Element) response.getElementsByTagName("invitationInfo").item(0));
+    }
+
+
+    public List<InvitationInfo> getInvitationList(String invFilter, String coursefilter) throws Exception {
+        ServiceRequest request = new ServiceRequest(configuration);
+        if (invFilter != null) {
+            request.getParameters().add("filter", invFilter);
         }
         if (coursefilter != null) {
-			request.getParameters().add("coursefilter", coursefilter);
+            request.getParameters().add("coursefilter", coursefilter);
         }
-        
+
         Document response = request.callService("rustici.invitation.getInvitationList");
         return InvitationInfo.parseListFromXml(response);
     }
-  	
-	public void ChangeStatus(String invitationId, boolean enable, boolean open) throws Exception
-    {
-		ServiceRequest request = new ServiceRequest(configuration);
+
+    public void ChangeStatus(String invitationId, boolean enable, boolean open) throws Exception {
+        ServiceRequest request = new ServiceRequest(configuration);
         request.getParameters().add("invitationId", invitationId);
         request.getParameters().add("enable", enable);
-		request.getParameters().add("open", open);
-        
-		request.callService("rustici.invitation.changeStatus");
-		
+        request.getParameters().add("open", open);
+
+        request.callService("rustici.invitation.changeStatus");
+
     }
-  	
+
 }

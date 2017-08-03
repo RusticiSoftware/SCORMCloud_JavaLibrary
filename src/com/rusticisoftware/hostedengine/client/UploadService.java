@@ -28,21 +28,19 @@
 
 package com.rusticisoftware.hostedengine.client;
 
+import com.rusticisoftware.hostedengine.client.datatypes.FileData;
+import com.rusticisoftware.hostedengine.client.datatypes.UploadProgress;
+import com.rusticisoftware.hostedengine.client.datatypes.UploadToken;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
+public class UploadService {
+    private static final Logger log = Logger.getLogger(UploadService.class.getName());
 
-import com.rusticisoftware.hostedengine.client.datatypes.FileData;
-import com.rusticisoftware.hostedengine.client.datatypes.UploadProgress;
-import com.rusticisoftware.hostedengine.client.datatypes.UploadToken;
-
-public class UploadService
-{
-	private static final Logger log = Logger.getLogger(UploadService.class.getName());
-	
     private Configuration configuration = null;
     private ScormEngineService manager = null;
 
@@ -50,8 +48,7 @@ public class UploadService
     /// Main constructor that provides necessary configuration information
     /// </summary>
     /// <param name="configuration">Application Configuration Data</param>
-    public UploadService(Configuration configuration, ScormEngineService manager)
-    {
+    public UploadService(Configuration configuration, ScormEngineService manager) {
         this.configuration = configuration;
         this.manager = manager;
     }
@@ -60,8 +57,7 @@ public class UploadService
     /// Retrieve upload token, which must be acquired and pass to a subsequent call to UploadFile
     /// </summary>
     /// <returns>An upload token which can be used in a call to UploadFile</returns>
-    public UploadToken GetUploadToken() throws Exception
-    {
+    public UploadToken GetUploadToken() throws Exception {
         ServiceRequest request = new ServiceRequest(configuration);
         Document response = request.callService("rustici.upload.getUploadToken");
         return new UploadToken(response);
@@ -73,8 +69,7 @@ public class UploadService
     /// <param name="absoluteFilePathToZip">Absolute local path to file to be uploaded</param>
     /// <param name="permissionDomain">The upload "permission domain" under which to upload the file</param>
     /// <returns>A relative path to the file uploaded, which should be used in a subsequent call to ImportCourse or VersionCourse</returns>
-    public String UploadFile(String absoluteFilePathToZip, String permissionDomain) throws Exception
-    {
+    public String UploadFile(String absoluteFilePathToZip, String permissionDomain) throws Exception {
         UploadToken token = GetUploadToken();
         return UploadFile(absoluteFilePathToZip, permissionDomain, token);
     }
@@ -86,8 +81,7 @@ public class UploadService
     /// <param name="permissionDomain">The upload "permission domain" under which to upload the file</param>
     /// <param name="token">A previously acquired upload token to be used for this upload request</param>
     /// <returns>A relative path to the file uploaded, which should be used in a subsequent call to ImportCourse or VersionCourse</returns>
-    public String UploadFile(String absoluteFilePathToZip, String permissionDomain, UploadToken token) throws Exception
-    {
+    public String UploadFile(String absoluteFilePathToZip, String permissionDomain, UploadToken token) throws Exception {
         ServiceRequest request = new ServiceRequest(configuration);
         request.setFileToPost(absoluteFilePathToZip);
         //request.setServer(token.getServer());
@@ -98,7 +92,7 @@ public class UploadService
         }
 
         Document response = request.callService("rustici.upload.uploadFile");
-        Element location = (Element)response.getElementsByTagName("location").item(0);
+        Element location = (Element) response.getElementsByTagName("location").item(0);
         return location.getTextContent();
     }
 
@@ -106,8 +100,7 @@ public class UploadService
     /// Return a url that can be embedded in the action attribute of a form element
     /// </summary>
     /// <param name="redirectUrl">The url to redirect to after the upload is complete</param>
-    public String GetUploadUrl(String redirectUrl) throws Exception
-    {
+    public String GetUploadUrl(String redirectUrl) throws Exception {
         return GetUploadUrl(redirectUrl, null);
     }
 
@@ -116,14 +109,13 @@ public class UploadService
     /// </summary>
     /// <param name="redirectUrl">The url to redirect to after the upload is complete</param>
     /// <param name="permissionDomain">The permission domain in which the upload should be placed</param>
-    public String GetUploadUrl(String redirectUrl, String permissionDomain) throws Exception
-    {
+    public String GetUploadUrl(String redirectUrl, String permissionDomain) throws Exception {
         UploadToken token = GetUploadToken();
-        
+
         ServiceRequest request = new ServiceRequest(configuration);
         request.getParameters().add("token", token.getTokenId());
         //request.setServer(token.getServer());
-        
+
         if (!Utils.isNullOrEmpty(permissionDomain)) {
             request.getParameters().add("pd", permissionDomain);
         }
@@ -132,13 +124,12 @@ public class UploadService
         }
         return request.constructUrl("rustici.upload.uploadFile");
     }
-    
-    public UploadProgress GetUploadProgress(String tokenId) throws Exception
-    {
-    	ServiceRequest request = new ServiceRequest(configuration);
-    	request.getParameters().add("token", tokenId);
-    	Document response = request.callService("rustici.upload.getUploadProgress");
-    	return new UploadProgress(response);
+
+    public UploadProgress GetUploadProgress(String tokenId) throws Exception {
+        ServiceRequest request = new ServiceRequest(configuration);
+        request.getParameters().add("token", tokenId);
+        Document response = request.callService("rustici.upload.getUploadProgress");
+        return new UploadProgress(response);
     }
 
     /// <summary>
@@ -146,8 +137,7 @@ public class UploadService
     /// configured appId.
     /// </summary>
     /// <returns>List of Course Data objects</returns>
-    public List<FileData> GetFileList() throws Exception
-    {
+    public List<FileData> GetFileList() throws Exception {
         return GetFileList(null);
     }
 
@@ -156,11 +146,11 @@ public class UploadService
     /// configured appId.
     /// </summary>
     /// <returns>List of Course Data objects</returns>
-    public List<FileData> GetFileList(String permissionDomain) throws Exception
-    {
+    public List<FileData> GetFileList(String permissionDomain) throws Exception {
         ServiceRequest request = new ServiceRequest(configuration);
-        if (!Utils.isNullOrEmpty(permissionDomain))
+        if (!Utils.isNullOrEmpty(permissionDomain)) {
             request.getParameters().add("pd", permissionDomain);
+        }
         Document response = request.callService("rustici.upload.listFiles");
         return FileData.ConvertToFileDataList(response);
     }
@@ -168,14 +158,13 @@ public class UploadService
     /// <summary>
     /// Delete the specified files given filenames only (not full path)
     /// </summary>
-    public void DeleteFileList(List<String> fileNames, String permissionDomain) throws Exception
-    {
+    public void DeleteFileList(List<String> fileNames, String permissionDomain) throws Exception {
         ServiceRequest request = new ServiceRequest(configuration);
-        if (!Utils.isNullOrEmpty(permissionDomain))
+        if (!Utils.isNullOrEmpty(permissionDomain)) {
             request.getParameters().add("pd", permissionDomain);
+        }
 
-        for (String file : fileNames)
-        {
+        for (String file : fileNames) {
             request.getParameters().add("file", file);
         }
 
@@ -186,16 +175,14 @@ public class UploadService
     /// Delete the specified files given filenames only (not full path)
     /// from the default domain
     /// </summary>
-    public void DeleteFileList(List<String> fileNames) throws Exception
-    {
+    public void DeleteFileList(List<String> fileNames) throws Exception {
         DeleteFileList(fileNames, null);
     }
 
     /// <summary>
     /// Delete the specified file from the permission domain
     /// </summary>
-    public void DeleteFile(String fileName, String permissionDomain) throws Exception
-    {
+    public void DeleteFile(String fileName, String permissionDomain) throws Exception {
         List<String> fileNames = new ArrayList<String>();
         fileNames.add(fileName);
         DeleteFileList(fileNames, permissionDomain);
@@ -204,8 +191,7 @@ public class UploadService
     /// <summary>
     /// Delete the specified file from the default domain
     /// </summary>
-    public void DeleteFile(String filePath) throws Exception
-    {
+    public void DeleteFile(String filePath) throws Exception {
         String domain = null;
         String fileName = filePath;
 

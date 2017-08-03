@@ -29,56 +29,53 @@
 package com.rusticisoftware.hostedengine.client;
 
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 
 public class StatementForwardService {
 
     private Configuration configuration = null;
     private ScormEngineService manager = null;
-	
+
     /// <summary>
     /// Main constructor that provides necessary configuration information
     /// </summary>
     /// <param name="configuration">Application Configuration Data</param>
-    public StatementForwardService(Configuration configuration, ScormEngineService manager)
-    {
+    public StatementForwardService(Configuration configuration, ScormEngineService manager) {
         this.configuration = configuration;
         this.manager = manager;
     }
 
-	public String AddPath(String sURL, String sUsername, String sPassword, String dURL, 
-		String dUsername, String dPassword) throws Exception {
+    public String AddPath(String sURL, String sUsername, String sPassword, String dURL,
+                          String dUsername, String dPassword) throws Exception {
 
-		ServiceRequest request = new ServiceRequest(configuration);
-		request.getParameters().add("sourceURL", sURL);
-		request.getParameters().add("sourceUsername", sUsername);
-		request.getParameters().add("sourcePassword", sPassword);
-		request.getParameters().add("destinationURL", dURL);
-		request.getParameters().add("destinationUsername", dUsername);
-		request.getParameters().add("destinationPassword", dPassword);
-		return request.getStringFromService("rustici.statementForward.AddForwardingPath");
-	}
+        ServiceRequest request = new ServiceRequest(configuration);
+        request.getParameters().add("sourceURL", sURL);
+        request.getParameters().add("sourceUsername", sUsername);
+        request.getParameters().add("sourcePassword", sPassword);
+        request.getParameters().add("destinationURL", dURL);
+        request.getParameters().add("destinationUsername", dUsername);
+        request.getParameters().add("destinationPassword", dPassword);
+        return request.getStringFromService("rustici.statementForward.AddForwardingPath");
+    }
 
-	public void UpdatePath(String id, String sURL, String sUsername, String sPassword, String dURL, 
-		String dUsername, String dPassword) throws Exception {
+    public void UpdatePath(String id, String sURL, String sUsername, String sPassword, String dURL,
+                           String dUsername, String dPassword) throws Exception {
 
-		ServiceRequest request = new ServiceRequest(configuration);
-		request.getParameters().add("id", id);
-		request.getParameters().add("sourceURL", sURL);
-		request.getParameters().add("sourceUsername", sUsername);
-		request.getParameters().add("sourcePassword", sPassword);
-		request.getParameters().add("destinationURL", dURL);
-		request.getParameters().add("destinationUsername", dUsername);
-		request.getParameters().add("destinationPassword", dPassword);
+        ServiceRequest request = new ServiceRequest(configuration);
+        request.getParameters().add("id", id);
+        request.getParameters().add("sourceURL", sURL);
+        request.getParameters().add("sourceUsername", sUsername);
+        request.getParameters().add("sourcePassword", sPassword);
+        request.getParameters().add("destinationURL", dURL);
+        request.getParameters().add("destinationUsername", dUsername);
+        request.getParameters().add("destinationPassword", dPassword);
 
-	    Document response = request.callService("rustici.statementForward.UpdateForwardingPath");
-	}
+        Document response = request.callService("rustici.statementForward.UpdateForwardingPath");
+    }
 
-	public void DeletePath(String id) throws Exception {
-		ServiceRequest request = new ServiceRequest(configuration);
-		request.getParameters().add("id", id);
+    public void DeletePath(String id) throws Exception {
+        ServiceRequest request = new ServiceRequest(configuration);
+        request.getParameters().add("id", id);
 
-	    Document response = request.callService("rustici.statementForward.DeleteForwardingPath");
-	}
+        Document response = request.callService("rustici.statementForward.DeleteForwardingPath");
+    }
 }

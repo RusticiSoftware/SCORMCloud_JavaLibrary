@@ -25,20 +25,19 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
- 
+
 package com.rusticisoftware.hostedengine.client;
 
-import java.util.regex.*;
+import java.util.regex.Pattern;
 
 public class ScormEngineUtilities {
-	public static String getCanonicalOriginString(String organization, String application, String version)
-	{
-		Pattern namePattern = Pattern.compile("[^a-z0-9]");
-		Pattern versionPattern = Pattern.compile("[^\\w\\.\\-]");
-		String organizationComponent = namePattern.matcher(organization).replaceAll("");
-		String applicationComponent = namePattern.matcher(application).replaceAll("");
-		String versionComponent = versionPattern.matcher(version).replaceAll("");
-		
-		return String.format("%1$s.%2$s.%3$s", organizationComponent, applicationComponent, versionComponent);
-	}
+    public static String getCanonicalOriginString(String organization, String application, String version) {
+        Pattern namePattern = Pattern.compile("[^a-z0-9]");
+        Pattern versionPattern = Pattern.compile("[^\\w\\.\\-]");
+        String organizationComponent = namePattern.matcher(organization).replaceAll("");
+        String applicationComponent = namePattern.matcher(application).replaceAll("");
+        String versionComponent = versionPattern.matcher(version).replaceAll("");
+
+        return String.format("%1$s.%2$s.%3$s", organizationComponent, applicationComponent, versionComponent);
+    }
 }

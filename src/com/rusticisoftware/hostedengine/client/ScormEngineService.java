@@ -28,8 +28,7 @@
 
 package com.rusticisoftware.hostedengine.client;
 
-public class ScormEngineService
-{
+public class ScormEngineService {
     private Configuration configuration = null;
     private LrsAccountService lrsAccountService = null;
     private CourseService courseService = null;
@@ -51,8 +50,7 @@ public class ScormEngineService
     /// <param name="appId">The Application ID obtained by registering with the SCORM Engine Service</param>
     /// <param name="securityKey">The security key (password) linked to the application ID</param>
     /// <param name="origin">The origin string that defines the organization, application name and version</param>
-    public ScormEngineService(String scormEngineServiceUrl, String appId, String securityKey, String origin)
-    {
+    public ScormEngineService(String scormEngineServiceUrl, String appId, String securityKey, String origin) {
         this(new Configuration(scormEngineServiceUrl, appId, securityKey, origin));
     }
 
@@ -60,8 +58,7 @@ public class ScormEngineService
     /// SCORM Engine Service constructor that takes a single configuration parameter
     /// </summary>
     /// <param name="config">The Configuration object to be used to configure the Scorm Engine Service client</param>
-    public ScormEngineService(Configuration config)
-    {
+    public ScormEngineService(Configuration config) {
         configuration = config;
         lrsAccountService = new LrsAccountService(configuration, this);
         courseService = new CourseService(configuration, this);
@@ -76,28 +73,25 @@ public class ScormEngineService
         debugService = new DebugService(configuration, this);
         stmtFrwdService = new StatementForwardService(configuration, this);
     }
-    
+
     /// <summary>
     /// Contains SCORM Engine LRS account functionality.
     /// </summary>
-    public LrsAccountService getAccountService()
-    {
+    public LrsAccountService getAccountService() {
         return lrsAccountService;
     }
 
     /// <summary>
     /// Contains all SCORM Engine Package-level (i.e., course) functionality.
     /// </summary>
-    public CourseService getCourseService()
-    {
+    public CourseService getCourseService() {
         return courseService;
     }
 
     /// <summary>
     /// Contains all SCORM Engine Package-level (i.e., course) functionality.
     /// </summary>
-    public RegistrationService getRegistrationService()
-    {
+    public RegistrationService getRegistrationService() {
         return registrationService;
     }
 
@@ -105,58 +99,52 @@ public class ScormEngineService
     /// <summary>
     /// SCORM Cloud invitation functionality.
     /// </summary>
-    public InvitationService getInvitationService()
-    {
+    public InvitationService getInvitationService() {
         return invitationService;
     }
 
     /// <summary>
     /// Contains all SCORM Engine Upload/File Management functionality.
     /// </summary>
-    public UploadService getUploadService()
-    {
+    public UploadService getUploadService() {
         return uploadService;
     }
 
     /// <summary>
     /// Contains all SCORM Engine FTP Management functionality.
     /// </summary>
-    public FtpService getFtpService()
-    {
+    public FtpService getFtpService() {
         return ftpService;
     }
-    
+
     /// <summary>
     /// Contains all SCORM Engine Data Export functionality.
     /// </summary>
-    public ExportService getExportService()
-    {
+    public ExportService getExportService() {
         return exportService;
     }
-    
+
     /// <summary>
     /// Contains SCORM Cloud reporting methods.
     /// </summary>
-    public ReportingService getReportingService()
-    {
+    public ReportingService getReportingService() {
         return reportingService;
     }
-    
+
     /// <summary>
     /// Contains SCORM Cloud tagging methods.
     /// </summary>
-    public TaggingService getTaggingService()
-    {
+    public TaggingService getTaggingService() {
         return taggingService;
     }
-    
+
     /// <summary>
     /// Contains methods for accessing SCORM dispatch
     /// </summary>
     public DispatchService getDispatchService() {
-		return dispatchService;
-	}
-    
+        return dispatchService;
+    }
+
     /// <summary>
     /// Contains methods for accessing Tin Can statement forwarding
     /// </summary>
@@ -167,23 +155,21 @@ public class ScormEngineService
     /// <summary>
     /// Contains SCORM Cloud debug methods.
     /// </summary>
-    public DebugService getDebugService(){
-    	return debugService;
+    public DebugService getDebugService() {
+        return debugService;
     }
-    
+
     /// <summary>
     /// The Application ID obtained by registering with the SCORM Engine Service
     /// </summary>
-    public String getAppId()
-    {
+    public String getAppId() {
         return configuration.getAppId();
     }
 
     /// <summary>
     /// set a new Application Id for service calls
     /// </summary>
-    public ScormEngineService setAppId(String newAppId)
-    {
+    public ScormEngineService setAppId(String newAppId) {
         configuration.setAppId(newAppId);
         return this;
     }
@@ -191,37 +177,32 @@ public class ScormEngineService
     /// <summary>
     /// The security key (password) linked to the Application ID
     /// </summary>
-    public String getSecurityKey()
-    {
-            return configuration.getSecurityKey();
+    public String getSecurityKey() {
+        return configuration.getSecurityKey();
     }
 
     /// <summary>
     /// The security key (password) linked to the Application ID
     /// </summary>
-    public ScormEngineService setSecurityKey(String newSecurityKey)
-    {
-            configuration.setSecurityKey(newSecurityKey);
-            return this;
+    public ScormEngineService setSecurityKey(String newSecurityKey) {
+        configuration.setSecurityKey(newSecurityKey);
+        return this;
     }
 
     /// <summary>
     /// URL to the service, ex: http://cloud.scorm.com/EngineWebServices
     /// </summary>
-    public String getScormEngineServiceUrl()
-    {
-            return configuration.getScormEngineServiceUrl();
-    }
-    
-    public String getOrigin()
-    {
-    	return configuration.getOrigin();
+    public String getScormEngineServiceUrl() {
+        return configuration.getScormEngineServiceUrl();
     }
 
-    public ServiceRequest CreateNewRequest()
-    {
+    public String getOrigin() {
+        return configuration.getOrigin();
+    }
+
+    public ServiceRequest CreateNewRequest() {
         return new ServiceRequest(this.configuration);
     }
 
-	
+
 }

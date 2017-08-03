@@ -28,15 +28,13 @@
 
 package com.rusticisoftware.hostedengine.client;
 
-import java.util.List;
-
+import com.rusticisoftware.hostedengine.client.datatypes.ActivityProvider;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import com.rusticisoftware.hostedengine.client.datatypes.ActivityProvider;
+import java.util.List;
 
-public class LrsAccountService 
-{
+public class LrsAccountService {
     private Configuration configuration = null;
     private ScormEngineService manager = null;
 
@@ -44,22 +42,20 @@ public class LrsAccountService
     /// Main constructor that provides necessary configuration information
     /// </summary>
     /// <param name="configuration">Application Configuration Data</param>
-    public LrsAccountService(Configuration configuration, ScormEngineService manager)
-    {
+    public LrsAccountService(Configuration configuration, ScormEngineService manager) {
         this.configuration = configuration;
         this.manager = manager;
     }
-    
+
     /// <summary>
     /// Calling this method will create a new activity provider with a unique, and randomly generated, key and password combination.
     /// </summary>
     /// <returns></returns>
-    public ActivityProvider createActivityProvider() throws Exception
-    {
+    public ActivityProvider createActivityProvider() throws Exception {
         ServiceRequest sr = new ServiceRequest(this.configuration);
 
         Document response = sr.callService("rustici.lrsaccount.createActivityProvider");
-        Element resultElem = (Element)(response.getElementsByTagName("activityProvider").item(0));
+        Element resultElem = (Element) (response.getElementsByTagName("activityProvider").item(0));
         return ActivityProvider.parseFromXmlElement(resultElem);
     }
 
@@ -67,12 +63,11 @@ public class LrsAccountService
     /// Calling this method will return a list of all current activity providers created by this service.
     /// </summary>
     /// <returns></returns>
-    public List<ActivityProvider> listActivityProviders() throws Exception
-    {
-      ServiceRequest sr = new ServiceRequest(this.configuration);
-      Document response = sr.callService("rustici.lrsaccount.listActivityProviders");
+    public List<ActivityProvider> listActivityProviders() throws Exception {
+        ServiceRequest sr = new ServiceRequest(this.configuration);
+        Document response = sr.callService("rustici.lrsaccount.listActivityProviders");
 
-      return ActivityProvider.parseListFromXml(response);
+        return ActivityProvider.parseListFromXml(response);
     }
 
     /// <summary>
@@ -83,36 +78,34 @@ public class LrsAccountService
     /// <param name="authType">Optional 'basic' or 'oauth'</param>
     /// <param name="isActive">Optional true or false indicating whether or not this account should be enabled</param>
     /// <param name="label">Optional name for the activity provider</param>
-    public void editActivityProvider(String accountKey, String authType, Boolean isActive, String label) throws Exception 
-    {
-      ServiceRequest sr = new ServiceRequest(configuration);
+    public void editActivityProvider(String accountKey, String authType, Boolean isActive, String label) throws Exception {
+        ServiceRequest sr = new ServiceRequest(configuration);
 
-      sr.getParameters().add("accountkey", accountKey);
+        sr.getParameters().add("accountkey", accountKey);
 
-      if(authType != null) {
-        sr.getParameters().add("authtype", authType);
-      }
-      if(isActive != null) {
-        sr.getParameters().add("isactive", isActive);
-      }
-      if(label != null) {
-        sr.getParameters().add("label", label);
-      }
+        if (authType != null) {
+            sr.getParameters().add("authtype", authType);
+        }
+        if (isActive != null) {
+            sr.getParameters().add("isactive", isActive);
+        }
+        if (label != null) {
+            sr.getParameters().add("label", label);
+        }
 
-      sr.callService("rustici.lrsaccount.editActivityProvider");
+        sr.callService("rustici.lrsaccount.editActivityProvider");
     }
-    
+
     /// <summary>
     /// Calling this method deletes the activity provider indicated by the accountKey passed in. This cannot be undone. If you 
     /// wish to temporarily disable an Activity provider use the edit API instead.
     /// </summary>
     /// <param name="accountKey">Required account key for the activity provider to delete</param>
-    public void deleteActivityProvider(String accountKey) throws Exception
-    {
+    public void deleteActivityProvider(String accountKey) throws Exception {
         ServiceRequest sr = new ServiceRequest(configuration);
-        
+
         sr.getParameters().add("accountkey", accountKey);
-        
+
         sr.callService("rustici.lrsaccount.deleteActivityProvider");
     }
 

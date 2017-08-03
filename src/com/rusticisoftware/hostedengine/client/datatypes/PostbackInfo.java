@@ -25,20 +25,19 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.rusticisoftware.hostedengine.client.datatypes;
 
-import org.w3c.dom.Element;
+package com.rusticisoftware.hostedengine.client.datatypes;
 
 import com.rusticisoftware.hostedengine.client.Utils;
 import com.rusticisoftware.hostedengine.client.XmlUtils;
 import com.rusticisoftware.hostedengine.client.datatypes.Enums.RegistrationResultsAuthType;
 import com.rusticisoftware.hostedengine.client.datatypes.Enums.RegistrationResultsFormat;
+import org.w3c.dom.Element;
 
 /// <summary>
 /// Class to hold registration postback data
 /// </summary>
 /// <author>Dave@brindlewaye.com</author>
-
 public class PostbackInfo {
 
     private String regID;
@@ -47,7 +46,7 @@ public class PostbackInfo {
     private String password;
     private RegistrationResultsAuthType authType;
     private RegistrationResultsFormat resultsFormat;
-    
+
     /// <summary>
     /// Inflate postback info object from passed in xml element
     /// </summary>
@@ -57,77 +56,81 @@ public class PostbackInfo {
         this.setUrl(XmlUtils.getNamedElemValue(postbackInfoElem, "url"));
         this.setLogin(XmlUtils.getNamedElemValue(postbackInfoElem, "login"));
         this.setPassword(XmlUtils.getNamedElemValue(postbackInfoElem, "password"));
-        String authType_str = XmlUtils.getNamedElemValue(postbackInfoElem, "authtype");
-        if (!Utils.isNullOrEmpty(authType_str))
-        {
-            this.setAuthType(RegistrationResultsAuthType.getValue(authType_str));
-        }
-        else
-        {
+        String authTypeStr = XmlUtils.getNamedElemValue(postbackInfoElem, "authtype");
+        if (!Utils.isNullOrEmpty(authTypeStr)) {
+            this.setAuthType(RegistrationResultsAuthType.getValue(authTypeStr));
+        } else {
             this.setAuthType(RegistrationResultsAuthType.FORM);
         }
-        String resultsFormat_str = XmlUtils.getNamedElemValue(postbackInfoElem, "resultsformat");
-        if (!Utils.isNullOrEmpty(resultsFormat_str)){
-            this.setResultsFormat(RegistrationResultsFormat.getValue(resultsFormat_str));
-        }
-        else
-        {
+        String resultsFormatStr = XmlUtils.getNamedElemValue(postbackInfoElem, "resultsformat");
+        if (!Utils.isNullOrEmpty(resultsFormatStr)) {
+            this.setResultsFormat(RegistrationResultsFormat.getValue(resultsFormatStr));
+        } else {
             this.setResultsFormat(RegistrationResultsFormat.COURSE_SUMMARY);
         }
-        
+
     }
-    
+
     @Override
-    public boolean equals(Object right)
-    {
-        int e = 1;
-        if (right instanceof PostbackInfo)
-        {
-            PostbackInfo r = (PostbackInfo)right;
-            e = 0;
-            e += (this.getAuthType() == r.getAuthType()) ? 0 : 1;
-            e += (this.getLogin().equals(r.getLogin())) ? 0 : 1;
-            e += (this.getPassword().equals(r.getLogin())) ? 0 : 1;
-            e += (this.getRegID().equals(r.getRegID())) ? 0 : 1;
-            e += (this.getResultsFormat() == r.getResultsFormat()) ? 0 : 1;
-            e += (this.getUrl().equals(r.getUrl())) ? 0 : 1;
+    public boolean equals(Object right) {
+        int equalityCount = 1;
+        if (right instanceof PostbackInfo) {
+            PostbackInfo rightPostbackInfo = (PostbackInfo) right;
+            equalityCount = 0;
+            equalityCount += (this.getAuthType() == rightPostbackInfo.getAuthType()) ? 0 : 1;
+            equalityCount += (this.getLogin().equals(rightPostbackInfo.getLogin())) ? 0 : 1;
+            equalityCount += (this.getPassword().equals(rightPostbackInfo.getLogin())) ? 0 : 1;
+            equalityCount += (this.getRegID().equals(rightPostbackInfo.getRegID())) ? 0 : 1;
+            equalityCount += (this.getResultsFormat() == rightPostbackInfo.getResultsFormat()) ? 0 : 1;
+            equalityCount += (this.getUrl().equals(rightPostbackInfo.getUrl())) ? 0 : 1;
         }
-        return (e == 0);
+        return (equalityCount == 0);
     }
-    
+
     public String getUrl() {
         return url;
     }
+
     public void setUrl(String url) {
         this.url = url;
     }
+
     public String getLogin() {
         return login;
     }
+
     public void setLogin(String login) {
         this.login = login;
     }
+
     public String getPassword() {
         return password;
     }
+
     public void setPassword(String password) {
         this.password = password;
     }
+
     public RegistrationResultsAuthType getAuthType() {
         return authType;
     }
+
     public void setAuthType(RegistrationResultsAuthType authType) {
         this.authType = authType;
     }
+
     public RegistrationResultsFormat getResultsFormat() {
         return resultsFormat;
     }
+
     public void setResultsFormat(RegistrationResultsFormat resultsFormat) {
         this.resultsFormat = resultsFormat;
     }
+
     public String getRegID() {
         return regID;
     }
+
     public void setRegID(String regID) {
         this.regID = regID;
     }

@@ -31,84 +31,79 @@ package com.rusticisoftware.hostedengine.client;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 public class RequestSigner {
-	
-	private static List<String> excludedParams = Arrays.asList(new String[]{ "sig", "filedata" });
-	public static boolean isExcludedParam(String paramName){
-		return excludedParams.contains(paramName);
-	}
-	
-	// Return a hex string representing the MD5 hash of the secret key and request params
-	// *In a client library, the secret key could be made into a class member of this class.
-	//public static String getSignatureForRequest(Map requestParams, String secretKey) throws WebServiceException
-	public static String getSignatureForRequest(Map requestParams, String secretKey) throws Exception
-	{	
-		try {
-			String serializedRequestString = getSerializedParams(requestParams);
-			
-			String signatureParts = secretKey + serializedRequestString;
-			byte[] encodedSigParts = signatureParts.getBytes("UTF8");
-			byte[] generatedSignature = MessageDigest.getInstance("MD5").digest(encodedSigParts);
 
-			return getHexString(generatedSignature);
-			
-		} catch (NoSuchAlgorithmException nsae) {
-			return "";
-		} catch (UnsupportedEncodingException uee) {
-			return "";
-		}
-	}
-	
-	// Return the serialized request string. 
-	public static String getSerializedParams(Map<String, String[]> requestParams)
-	{	
-		StringBuilder paramString = new StringBuilder();
-		List<String> paramNames = new ArrayList<String>(requestParams.keySet());
-		Collections.sort(paramNames, String.CASE_INSENSITIVE_ORDER);
-		
-		for (String paramName : paramNames) {			
-			if (!isExcludedParam(paramName)){				
-				paramString.append(paramName);
-				
-				Object val = requestParams.get(paramName);
-				
-				// Allow the value to be a single string or
-				// an array of strings as is returned by
-				// request.getParameterMap()
-				if (val instanceof String[]) {	
-					List<String> valList = Arrays.asList((String[])val);
-					Collections.sort(valList);
-					for (String v : valList){
-						paramString.append(v);
-					}
-				} else {
-					paramString.append((String)val);
-				}
-			}
-		}
-		return paramString.toString();
-	}
-	
-	// Return a hex string representation of the passed in byte array
-	protected static String getHexString(byte[] input){
-		char hexDigit[] = {
-	       '0', '1', '2', '3', '4', '5', '6', '7',
-	       '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'
-	    };
-	    
-		StringBuilder hexString = new StringBuilder();
-		for (byte b : input){
-			char[] array = { hexDigit[(b >> 4) & 0x0f], hexDigit[b & 0x0f] };
-	    	hexString.append(array);
-		}
-		return hexString.toString();
-	}
-	
+    private static List<String> excludedParams = Arrays.asList("sig", "filedata");
+
+    public static boolean isExcludedParam(String paramName) {
+        return excludedParams.contains(paramName);
+    }
+
+    // Return a hex string representing the MD5 hash of the secret key and request params
+    // *In a client library, the secret key could be made into a class member of this class.
+    //public static String getSignatureForRequest(Map requestParams, String secretKey) throws WebServiceException
+    public static String getSignatureForRequest(Map requestParams, String secretKey) throws Exception {
+        try {
+            String serializedRequestString = getSerializedParams(requestParams);
+
+            String signatureParts = secretKey + serializedRequestString;
+            byte[] encodedSigParts = signatureParts.getBytes("UTF8");
+            byte[] generatedSignature = MessageDigest.getInstance("MD5").digest(encodedSigParts);
+
+            return getHexString(generatedSignature);
+
+        } catch (NoSuchAlgorithmException nsae) {
+            return "";
+        } catch (UnsupportedEncodingException uee) {
+            return "";
+        }
+    }
+
+    // Return the serialized request string.
+    public static String getSerializedParams(Map<String, String[]> requestParams) {
+        StringBuilder paramString = new StringBuilder();
+        List<String> paramNames = new ArrayList<String>(requestParams.keySet());
+        Collections.sort(paramNames, String.CASE_INSENSITIVE_ORDER);
+
+        for (String paramName : paramNames) {
+            if (!isExcludedParam(paramName)) {
+                paramString.append(paramName);
+
+                Object val = requestParams.get(paramName);
+
+                // Allow the value to be a single string or
+                // an array of strings as is returned by
+                // request.getParameterMap()
+                if (val instanceof String[]) {
+                    List<String> valList = Arrays.asList((String[]) val);
+                    Collections.sort(valList);
+                    for (String v : valList) {
+                        paramString.append(v);
+                    }
+                } else {
+                    paramString.append((String) val);
+                }
+            }
+        }
+        return paramString.toString();
+    }
+
+    // Return a hex string representation of the passed in byte array
+    protected static String getHexString(byte[] input) {
+        char hexDigit[] = {
+            '0', '1', '2', '3', '4', '5', '6', '7',
+            '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'
+        };
+
+        StringBuilder hexString = new StringBuilder();
+        for (byte b : input) {
+            char[] array = {hexDigit[(b >> 4) & 0x0f], hexDigit[b & 0x0f]};
+            hexString.append(array);
+        }
+        return hexString.toString();
+    }
+
 }

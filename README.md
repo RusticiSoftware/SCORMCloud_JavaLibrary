@@ -11,7 +11,7 @@ See our [API quick start][1] guide for more information.
 
 ## Requirements
 
-Requires Java 6 or greater.
+Requires Java 7 or greater.
 
 ## Installation
 

@@ -1,5 +1,11 @@
 # SCORM Cloud Java API Bindings
 
+## WARNING
+
+*This is the JRE 6 branch of the client library.* This version of the
+client library does not support uploading courses greater than 2 GiB
+in size. This version is also not published on Maven.
+
 This library provides implementations for the majority, but not all, of the
 [SCORM Cloud API][1]. It is provided under the BSD 3-clause License (see
 [LICENSE](LICENSE.md)).
@@ -15,19 +21,8 @@ Requires Java 7 or greater.
 
 ## Installation
 
-This library is available [via Maven][2].
-
-In a Maven configuration,
-
-    <dependency>
-       <groupId>com.rusticisoftware.hostedengine.client</groupId>
-       <artifactId>scormcloud-java-lib</artifactId>
-       <version>1.1.3</version>
-    </dependency>
-
-or in Gradle:
-
-    compile 'com.rusticisoftware.hostedengine.client:scormcloud-java-lib:1.1.3'
+Clone this repo and build it via `mvn package`. The output jar can be found
+in `target/`.
 
 ### Configuration
 

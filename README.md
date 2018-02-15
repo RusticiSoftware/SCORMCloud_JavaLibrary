@@ -22,12 +22,12 @@ In a Maven configuration,
     <dependency>
        <groupId>com.rusticisoftware.hostedengine.client</groupId>
        <artifactId>scormcloud-java-lib</artifactId>
-       <version>1.1.2</version>
+       <version>1.1.3</version>
     </dependency>
 
 or in Gradle:
 
-    compile 'com.rusticisoftware.hostedengine.client:scormcloud-java-lib:1.1.2'
+    compile 'com.rusticisoftware.hostedengine.client:scormcloud-java-lib:1.1.3'
 
 ### Configuration
 

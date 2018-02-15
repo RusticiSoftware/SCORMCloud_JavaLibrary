@@ -176,6 +176,32 @@ Don't hesitate to submit technical questions. Our support staff are excellent,
 and even if they can't answer a question or resolve a problem, tickets get
 escalated quickly to real, live developers.
 
+## Building Client Library
+
+Note: This section is for developing the client library itself and can be
+ignored if you're just interested in using it.
+
+This client library uses Maven to build.
+
+    mvn package
+
+will build jars and place them in `target/`.
+
+To check Java compatibility, run:
+
+    mvn animal-sniffer:check
+
+Java compatibility is controlled by the `maven.compiler.source` and
+`maven.compiler.target` parameters. To make the Animal Sniffer plugin
+check our API usage against a different version of Java, edit
+
+          <signature>
+            <groupId>org.codehaus.mojo.signature</groupId>
+            <artifactId>java17</artifactId>
+            <version>1.0</version>
+          </signature>
+
+in the pom.xml (e.g., change `java17` to `java16` to test Java 6 compat.)
 
 [1]: https://cloud.scorm.com/docs/quick_start.html
 [2]: http://mvnrepository.com/artifact/com.rusticisoftware.hostedengine.client/scormcloud-java-lib
